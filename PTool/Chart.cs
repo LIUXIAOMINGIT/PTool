@@ -251,7 +251,7 @@ namespace PTool
                     break;
             }
             float max = PressureManager.Instance().GetMaxBySizeLevel(pid, 50, Misc.OcclusionLevel.H);
-            if (max <= args.Weight)
+            if (max < args.Weight)
             {
                 Complete(1);
                 AlertMessageWhenComplete(string.Format("压力值已超出最大范围{0},调试结束!", max));
@@ -1146,16 +1146,19 @@ namespace PTool
         {
             if (sampleDataList == null || sampleDataList.Count == 0)
                 return;
-            switch (pid)
+            if (m_Channel == 1)
             {
-                case PumpID.GrasebyF6_2:
-                    pid = PumpID.GrasebyF6;
-                    break;
-                case PumpID.WZS50F6_2:
-                    pid = PumpID.WZS50F6;
-                    break;
-                default:
-                    break;
+                switch (pid)
+                {
+                    case PumpID.GrasebyF6_2:
+                        pid = PumpID.GrasebyF6;
+                        break;
+                    case PumpID.WZS50F6_2:
+                        pid = PumpID.WZS50F6;
+                        break;
+                    default:
+                        break;
+                }
             }
             List<PressureParameter> parameters = new List<PressureParameter>();
             ProductPressure pp = PressureManager.Instance().GetPressureByProductID(pid);
@@ -1164,7 +1167,7 @@ namespace PTool
             List<LevelPressure> lps = pp.GetLevelPressureList();
             List<float> midWeights = new List<float>();
             List<int> sizes = new List<int>();
-            if (pid == PumpID.WZS50F6 || pid == PumpID.GrasebyF6)
+            if (pid == PumpID.WZS50F6 || pid == PumpID.GrasebyF6 || pid == PumpID.GrasebyF6_2 || pid == PumpID.WZS50F6_2)
                 sizes.Add(10);
             sizes.Add(20);
             sizes.Add(30);

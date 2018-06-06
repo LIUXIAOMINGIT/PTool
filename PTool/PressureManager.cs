@@ -67,17 +67,17 @@ namespace PTool
 
         public ProductPressure GetPressureByProductID(PumpID pid)
         {
-            switch (pid)
-            {
-                case PumpID.GrasebyF6_2:
-                    pid = PumpID.GrasebyF6;
-                    break;
-                case PumpID.WZS50F6_2:
-                    pid = PumpID.WZS50F6;
-                    break;
-                default:
-                    break;
-            }
+            //switch (pid)
+            //{
+            //    case PumpID.GrasebyF6_2:
+            //        pid = PumpID.GrasebyF6;
+            //        break;
+            //    case PumpID.WZS50F6_2:
+            //        pid = PumpID.WZS50F6;
+            //        break;
+            //    default:
+            //        break;
+            //}
             if (m_HashProductPressure.ContainsKey(pid))
                 return m_HashProductPressure[pid] as ProductPressure;
             else
