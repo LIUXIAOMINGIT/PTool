@@ -304,6 +304,8 @@ namespace PTool
             m_LocalPid = ProductIDConvertor.String2PumpID(cbPumpType.Items[cbPumpType.SelectedIndex].ToString());
             chart1.SetPid(m_LocalPid);
             chart2.SetPid(m_LocalPid);
+            chart1.SetChannel(1);
+            chart2.SetChannel(2);
         }
 
         private void InitUI()
@@ -416,6 +418,8 @@ namespace PTool
 #endif
             chart1.SetPid(m_LocalPid);
             chart2.SetPid(m_LocalPid);
+            chart1.SetChannel(1);
+            chart2.SetChannel(2);
         }
 
         private void picCloseWindow_Click(object sender, EventArgs e)

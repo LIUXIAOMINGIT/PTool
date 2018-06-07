@@ -202,6 +202,15 @@ namespace PTool
         }
 
         /// <summary>
+        /// 设置详细信息通道号
+        /// </summary>
+        /// <param name="channel"></param>
+        public void SetChannel(int channel)
+        {
+            detail.Channel = channel;
+        }
+
+        /// <summary>
         ///仅检测串口使用
         /// </summary>
         /// <param name="sender"></param>
@@ -238,17 +247,24 @@ namespace PTool
             DrawSingleAccuracyMap();
             //当采集到的重量大于配置参数时，可以停止采集，并计算相关数据写入到泵中
             PumpID pid = PumpID.None;
-            switch (m_LocalPid)
+            if (this.m_Channel == 1)
             {
-                case PumpID.GrasebyF6_2:
-                    pid = PumpID.GrasebyF6;
-                    break;
-                case PumpID.WZS50F6_2:
-                    pid = PumpID.WZS50F6;
-                    break;
-                default:
-                    pid = m_LocalPid;
-                    break;
+                switch (m_LocalPid)
+                {
+                    case PumpID.GrasebyF6_2:
+                        pid = PumpID.GrasebyF6;
+                        break;
+                    case PumpID.WZS50F6_2:
+                        pid = PumpID.WZS50F6;
+                        break;
+                    default:
+                        pid = m_LocalPid;
+                        break;
+                }
+            }
+            else
+            {
+                pid = m_LocalPid;
             }
             float max = PressureManager.Instance().GetMaxBySizeLevel(pid, 50, Misc.OcclusionLevel.H);
             if (max < args.Weight)
