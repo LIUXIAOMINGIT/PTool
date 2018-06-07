@@ -324,6 +324,11 @@ namespace PTool
             m_SampleDataList.Clear();
         }
 
+        /// <summary>
+        /// 双道泵测量数据统一放进m_SampleDataList中，第一道数据索引为0，第二道为1
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnChartSamplingComplete(object sender, DoublePumpDataArgs e)
         {
             Chart chart = sender as Chart;
