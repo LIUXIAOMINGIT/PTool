@@ -40,7 +40,7 @@ namespace PTool
         {
             InitPumpType();
             LoadSettings();
-            //LoadConfig();
+            LoadConfig();
         }
 
         /// <summary>
@@ -61,6 +61,8 @@ namespace PTool
                 tbToolingNo.Text = strTool1;
                 tbToolingNo2.Text = strTool2;
 
+                #region 不要从config文件读取压力参数
+                /*
                 #region 读GrasebyC6压力范围
                 ConfigurationSectionGroup group = config.GetSectionGroup("GrasebyC6");
                 string scetionGroupName = string.Empty;
@@ -270,6 +272,8 @@ namespace PTool
                         //PressureManager.Instance().Add(pid, level, int.Parse(key), float.Parse(splitPressure[0]), float.Parse(splitPressure[1]), float.Parse(splitPressure[2]));
                     }
                 }
+                #endregion
+                */
                 #endregion
 
             }
