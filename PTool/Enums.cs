@@ -101,6 +101,9 @@ namespace PTool
                 case "Graseby2100":
                     pid = PumpID.Graseby2100;
                     break;
+                case "Graseby2000":
+                    pid = PumpID.Graseby2000;
+                    break;
                 case "WZ50C6":
                     pid = PumpID.GrasebyC6;
                     break;
