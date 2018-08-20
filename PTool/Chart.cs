@@ -51,7 +51,7 @@ namespace PTool
         private Graseby9600              m_GrasebyDevice       = new Graseby9600();//只用于串口刷新
         private PumpID                   m_LocalPid            = PumpID.GrasebyC6;//默认显示的是C6
         private System.Timers.Timer      m_Ch1Timer            = new System.Timers.Timer();
-        private int                      m_SampleInterval      = 500;//采样频率：毫秒
+        private int                      m_SampleInterval      = 400;//采样频率：毫秒
 
         private int                      m_Channel             = 1;//1号通道，默认值
         private string                   m_PumpNo              = string.Empty;//产品序号
@@ -71,6 +71,7 @@ namespace PTool
         /// 当双道泵，测量结束后通知主界面，把数据传入
         /// </summary>
         public event EventHandler<DoublePumpDataArgs> OnSamplingComplete;
+        public event EventHandler<EventArgs> ClearPumpNoWhenCompleteTest;
 
 
         /// <summary>
@@ -935,6 +936,8 @@ namespace PTool
             ws.Range(1, 1, 2, 1).SetDataType(XLCellValues.Text);
             ws.Range(1, 4, 2, 4).SetDataType(XLCellValues.Text);
             wb.SaveAs(name);
+            IntPtr handle = UserMessageHelper.FindWindow(null, "压力测试工具");
+            UserMessageHelper.SendMessage(handle, 0x1EE1, 0, 0);
         }
 
         /// <summary>
@@ -1240,6 +1243,8 @@ namespace PTool
             ws.Range(1, 4, rowIndex, 4).SetDataType(XLCellValues.Text);
             wb.SaveAs(name);
             sampleDataList.Clear();
+            IntPtr handle = UserMessageHelper.FindWindow(null, "压力测试工具");
+            UserMessageHelper.SendMessage(handle, 0x1EE1, 0, 0);
         }
 
         private void CalcuatePressure(PumpID pid, List<SampleData> sampleDataList)
@@ -1299,6 +1304,15 @@ namespace PTool
             }
 
             float pValue = FindZeroPValue(sampleDataList);
+
+            if ( pValue*100>= PressureForm.RangeMaxP || pValue * 100 <= PressureForm.RangeMinP )
+            {
+                Logger.Instance().ErrorFormat("P值超范围，请重试！P值={0},最小值={1},最大值={2}", pValue, PressureForm.RangeMinP, PressureForm.RangeMaxP);
+                sampleDataList.Clear();
+                MessageBox.Show("P值超范围，请重试！");
+                return;
+            }
+
             WritePValue2Pump(pValue);
             Logger.Instance().InfoFormat("测量结束，P值为{0}", pValue);
 
@@ -1326,6 +1340,14 @@ namespace PTool
                 }
                 caliParameters.Add(p);
             }
+
+            if(IsOutOfRange(caliParameters))
+            {
+                sampleDataList.Clear();
+                MessageBox.Show("P值变化大，请重试！");
+                return;
+            }
+
             WritePressureCaliParameter2Pump(caliParameters);
             detail.P0 = m_Ch1SampleDataList.Min(x => x.m_PressureValue) * 100;
             detail.CaliParameters = caliParameters;
@@ -1407,6 +1429,38 @@ namespace PTool
         }
 
         /// <summary>
+        /// 在写入泵之前判断数据是否超范围
+        /// </summary>
+        /// <param name="caliParas"></param>
+        /// <returns></returns>
+        private bool IsOutOfRange(List<PressureCalibrationParameter> caliParas)
+        {
+            bool bRet = false;
+            for (int i = 0; i < caliParas.Count; i++)
+            {
+                if (caliParas[i].m_PressureL >= PressureForm.PressureCalibrationMax)
+                {
+                    Logger.Instance().ErrorFormat("P值变化大，请重试！L ={0}", caliParas[i].m_PressureL);
+                    bRet = true;
+                    break;
+                }
+                if (caliParas[i].m_PressureC >= PressureForm.PressureCalibrationMax)
+                {
+                    Logger.Instance().ErrorFormat("P值变化大，请重试！C ={0}", caliParas[i].m_PressureC);
+                    bRet = true;
+                    break;
+                }
+                if (caliParas[i].m_PressureH >= PressureForm.PressureCalibrationMax)
+                {
+                    Logger.Instance().ErrorFormat("P值变化大，请重试！H ={0}", caliParas[i].m_PressureH);
+                    bRet = true;
+                    break;
+                }
+            }
+            return bRet;
+        }
+
+        /// <summary>
         /// 写入P值
         /// </summary>
         /// <param name="caliParas"></param>
@@ -1476,7 +1530,18 @@ namespace PTool
             m_Ch1SampleDataList.Clear();
             WavelinePanel.Invalidate();
 
-            #region 参数输入检查
+#region 参数输入检查
+
+            if (SamplingStartOrStop != null)
+            {
+                SamplingStartOrStop(this, new StartOrStopArgs(true));
+            }
+
+            if (string.IsNullOrEmpty(PumpNo))
+            {
+                MessageBox.Show("请输入产品序号");
+                return;
+            }
             float weight = 0;
             float rate = 0;
 
@@ -1511,9 +1576,9 @@ namespace PTool
                 MessageBox.Show("请正确输入速率！");
                 return;
             }
-            #endregion
+#endregion
 
-            #region 泵型号选择
+#region 泵型号选择
             Misc.ProductID pid = Misc.ProductID.None;
             switch (m_LocalPid)
             {
@@ -1549,7 +1614,7 @@ namespace PTool
                     pid = Misc.ProductID.None;
                     break;
             }
-            #endregion
+#endregion
 
             if (pid == Misc.ProductID.None)
             {

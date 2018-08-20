@@ -315,7 +315,7 @@
             this.chart1.Location = new System.Drawing.Point(3, 3);
             this.chart1.Name = "chart1";
             this.chart1.PumpNo = "";
-            this.chart1.SampleInterval = 500;
+            this.chart1.SampleInterval = 400;
             this.chart1.Size = new System.Drawing.Size(504, 608);
             this.chart1.TabIndex = 0;
             this.chart1.ToolingNo = "";
@@ -328,7 +328,7 @@
             this.chart2.Location = new System.Drawing.Point(516, 3);
             this.chart2.Name = "chart2";
             this.chart2.PumpNo = "";
-            this.chart2.SampleInterval = 500;
+            this.chart2.SampleInterval = 400;
             this.chart2.Size = new System.Drawing.Size(505, 608);
             this.chart2.TabIndex = 1;
             this.chart2.ToolingNo = "";

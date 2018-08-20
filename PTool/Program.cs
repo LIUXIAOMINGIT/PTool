@@ -15,7 +15,7 @@ namespace PTool
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new PressureForm());//
+            Application.Run(new PressureForm());
         }
     }
 }

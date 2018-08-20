@@ -28,6 +28,9 @@ namespace PTool
         private int m_SampleInterval = 500;//采样频率：毫秒
         private List<List<SampleData>> m_SampleDataList = new List<List<SampleData>>();//存放双道泵上传的数据，等第二道泵结束后，一起存在一张表中
 
+        public static int RangeMinP = 170;
+        public static int RangeMaxP = 210;
+        public static int PressureCalibrationMax = 418;
 
 
         public PressureForm()
@@ -35,6 +38,16 @@ namespace PTool
             InitializeComponent();
             InitUI();
         }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == 0x1EE1)
+            {
+                ClearPumpNoWhenCompleteTest();
+            }
+            base.WndProc(ref m);
+        }
+
 
         private void PressureForm_Load(object sender, EventArgs e)
         {
@@ -60,6 +73,10 @@ namespace PTool
                 string strTool2 = ConfigurationManager.AppSettings.Get("Tool2");
                 tbToolingNo.Text = strTool1;
                 tbToolingNo2.Text = strTool2;
+
+                RangeMinP = Int32.Parse(ConfigurationManager.AppSettings.Get("RangeMinP"));
+                RangeMaxP = Int32.Parse(ConfigurationManager.AppSettings.Get("RangeMaxP"));
+                PressureCalibrationMax = Int32.Parse(ConfigurationManager.AppSettings.Get("PressureCalibrationMax"));
 
                 #region 不要从config文件读取压力参数
                 /*
@@ -435,6 +452,18 @@ namespace PTool
             SaveLastToolingNo();
             this.Close();
         }
+
+        /// <summary>
+        /// 采样结束，清空产品序号 20180820
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClearPumpNoWhenCompleteTest()
+        {
+            tbPumpNo.Clear();
+        }
+
+
     }
 
     public class SampleData
