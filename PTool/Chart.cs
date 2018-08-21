@@ -1348,6 +1348,8 @@ namespace PTool
                 return;
             }
 
+
+
             WritePressureCaliParameter2Pump(caliParameters);
             detail.P0 = m_Ch1SampleDataList.Min(x => x.m_PressureValue) * 100;
             detail.CaliParameters = caliParameters;
@@ -1438,21 +1440,28 @@ namespace PTool
             bool bRet = false;
             for (int i = 0; i < caliParas.Count; i++)
             {
-                if (caliParas[i].m_PressureL >= PressureForm.PressureCalibrationMax)
+                if (caliParas[i].m_PressureL*100 >= PressureForm.PressureCalibrationMax)
                 {
                     Logger.Instance().ErrorFormat("P值变化大，请重试！L ={0}", caliParas[i].m_PressureL);
                     bRet = true;
                     break;
                 }
-                if (caliParas[i].m_PressureC >= PressureForm.PressureCalibrationMax)
+                if (caliParas[i].m_PressureC * 100 >= PressureForm.PressureCalibrationMax)
                 {
                     Logger.Instance().ErrorFormat("P值变化大，请重试！C ={0}", caliParas[i].m_PressureC);
                     bRet = true;
                     break;
                 }
-                if (caliParas[i].m_PressureH >= PressureForm.PressureCalibrationMax)
+                if (caliParas[i].m_PressureH * 100 >= PressureForm.PressureCalibrationMax)
                 {
                     Logger.Instance().ErrorFormat("P值变化大，请重试！H ={0}", caliParas[i].m_PressureH);
+                    bRet = true;
+                    break;
+                }
+
+                if(caliParas[i].m_PressureH <= caliParas[i].m_PressureC || caliParas[i].m_PressureC<= caliParas[i].m_PressureL || caliParas[i].m_PressureH <= caliParas[i].m_PressureL)
+                {
+                    Logger.Instance().ErrorFormat("P值异常高档位值小于低档位，请重试！{0}，{1}，{2}", caliParas[i].m_PressureL, caliParas[i].m_PressureC,caliParas[i].m_PressureH);
                     bRet = true;
                     break;
                 }
