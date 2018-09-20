@@ -206,7 +206,7 @@ namespace PTool
 
     }
 
-
+    [Serializable]
     public class PressureCalibrationParameter
     {
         public int m_SyringeSize; //注射器尺寸

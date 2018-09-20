@@ -23,44 +23,45 @@ namespace PTool
 {
     public partial class Chart : UserControl
     {
-        private readonly int BAUDRATE                          = 9600;
-        private const string VOL                               = "P值";
-        private const int LEFTBORDEROFFSET                     = 30;
-        private const int RIGHTBORDEROFFSET                    = 10;
-        private const int BOTTOMBORDEROFFSET                   = 30;     //X坐标与下边距，一般是绘图区域的一半高度
-        private const int TOPBOTTOMFFSET                       = 5;      //坐标上下边距
-        private const int CIRCLEDIAMETER                       = 5;      //曲线图上的圆点直径0
-        private const int TRYCOUNTSAMPLINGTIMEOUT              = 5;      //采样超时次数为5.超时5次就停止 
-        private Graphics                 m_gh                  = null;
+        private readonly int BAUDRATE = 9600;
+        private const string VOL = "P值";
+        private const int LEFTBORDEROFFSET = 30;
+        private const int RIGHTBORDEROFFSET = 10;
+        private const int BOTTOMBORDEROFFSET = 30;     //X坐标与下边距，一般是绘图区域的一半高度
+        private const int TOPBOTTOMFFSET = 5;      //坐标上下边距
+        private const int CIRCLEDIAMETER = 5;      //曲线图上的圆点直径0
+        private const int TRYCOUNTSAMPLINGTIMEOUT = 5;      //采样超时次数为5.超时5次就停止 
+        private Graphics m_gh = null;
         private System.Drawing.Rectangle m_Rect;
-        private Pen                      m_WaveLinePen         = new Pen(Color.FromArgb(19, 113, 185));
-        private SolidBrush               m_WaveLineBrush       = new SolidBrush(Color.FromArgb(19, 113, 185));
-        private float                    m_XCoordinateMaxValue = 10;
-        private int                      m_YCoordinateMaxValue = 5;
-        private int                      m_XSectionCount       = 10;
-        private int                      m_YSectionCount       = 5;
-        private float                    m_CoordinateIntervalX = 0;  //X轴上的区间实际长度，单位为像素
-        private float                    m_CoordinateIntervalY = 0;  //Y轴上的区间实际长度，单位为像素
-        private float                    m_ValueInervalX       = 0;  //X轴上的坐标值，根据实际放大倍数和量程决定
-        private float                    m_ValueInervalY       = 0;
-        private List<SampleData>         m_Ch1SampleDataList   = new List<SampleData>();
+        private Pen m_WaveLinePen = new Pen(Color.FromArgb(19, 113, 185));
+        private SolidBrush m_WaveLineBrush = new SolidBrush(Color.FromArgb(19, 113, 185));
+        private float m_XCoordinateMaxValue = 10;
+        private int m_YCoordinateMaxValue = 5;
+        private int m_XSectionCount = 10;
+        private int m_YSectionCount = 5;
+        private float m_CoordinateIntervalX = 0;  //X轴上的区间实际长度，单位为像素
+        private float m_CoordinateIntervalY = 0;  //Y轴上的区间实际长度，单位为像素
+        private float m_ValueInervalX = 0;  //X轴上的坐标值，根据实际放大倍数和量程决定
+        private float m_ValueInervalY = 0;
+        private List<SampleData> m_Ch1SampleDataList = new List<SampleData>();
 
-        protected GlobalResponse         m_ConnResponse        = null;
-        private PTooling                 m_PTool               = null;
-        private PTooling                 m_DetectPTool         = null;
-        private Graseby9600              m_GrasebyDevice       = new Graseby9600();//只用于串口刷新
-        private PumpID                   m_LocalPid            = PumpID.GrasebyC6;//默认显示的是C6
-        private System.Timers.Timer      m_Ch1Timer            = new System.Timers.Timer();
-        private int                      m_SampleInterval      = 400;//采样频率：毫秒
+        protected GlobalResponse m_ConnResponse = null;
+        private PTooling m_PTool = null;
+        private PTooling m_DetectPTool = null;
+        private Graseby9600 m_GrasebyDevice = new Graseby9600();//只用于串口刷新
+        private PumpID m_LocalPid = PumpID.GrasebyC6;//默认显示的是C6
+        private System.Timers.Timer m_Ch1Timer = new System.Timers.Timer();
+        private int m_SampleInterval = 400;//采样频率：毫秒
 
-        private int                      m_Channel             = 1;//1号通道，默认值
-        private string                   m_PumpNo              = string.Empty;//产品序号
-        private string                   m_ToolingNo           = string.Empty;//工装编号
+        private int m_Channel = 1;//1号通道，默认值
+        private string m_PumpNo = string.Empty;//产品序号
+        private string m_ToolingNo = string.Empty;//工装编号
 
         public delegate void DelegateSetWeightValue(float weight, bool isDetect);
         public delegate void DelegateSetPValue(float p);
         public delegate void DelegateEnableContols(bool bEnabled);
         public delegate void DelegateAlertMessageWhenComplete(string msg);
+        public delegate void DelegateInputOpratorNumber(string number);
 
         /// <summary>
         /// 当启动或停止时通知主界面
@@ -71,7 +72,7 @@ namespace PTool
         /// 当双道泵，测量结束后通知主界面，把数据传入
         /// </summary>
         public event EventHandler<DoublePumpDataArgs> OnSamplingComplete;
-        public event EventHandler<EventArgs> ClearPumpNoWhenCompleteTest;
+        public event EventHandler<OpratorNumberArgs> OpratorNumberInput;
 
 
         /// <summary>
@@ -89,10 +90,10 @@ namespace PTool
         public int Channel
         {
             get { return m_Channel; }
-            set 
+            set
             {
-                m_Channel = value; 
-               
+                m_Channel = value;
+
             }
         }
 
@@ -292,7 +293,7 @@ namespace PTool
                 this.BeginInvoke(new DelegateSetPValue(SetPValue), new object[] { p });
                 return;
             }
-            lbPValue.Text = (p*100).ToString("F0");
+            lbPValue.Text = (p * 100).ToString("F0");
             m_GrasebyDevice.Close();
         }
 
@@ -323,7 +324,7 @@ namespace PTool
                     CalcuatePressure(m_LocalPid, m_Ch1SampleDataList);
                     if (m_LocalPid == PumpID.GrasebyF6_2 || m_LocalPid == PumpID.WZS50F6_2)
                     {
-                        if (OnSamplingComplete != null && m_Ch1SampleDataList != null && m_Ch1SampleDataList.Count>0)
+                        if (OnSamplingComplete != null && m_Ch1SampleDataList != null && m_Ch1SampleDataList.Count > 0)
                             OnSamplingComplete(this, new DoublePumpDataArgs(m_Ch1SampleDataList));
                     }
                     Thread.Sleep(500);
@@ -506,7 +507,7 @@ namespace PTool
         /// <param name="e"></param>
         private void Chart_EnabledChanged(object sender, EventArgs e)
         {
-            if(this.Enabled)
+            if (this.Enabled)
             {
                 picStart.Image = global::PTool.Properties.Resources.icon_start_Blue;
                 picStop.Image = global::PTool.Properties.Resources.icon_stop_blue;
@@ -662,7 +663,7 @@ namespace PTool
             else
             {
                 Misc.PressureSensorInfo paras = args.EventData;
-                lbPValue.Text = (paras.pressureVoltage*100).ToString("F0");
+                lbPValue.Text = (paras.pressureVoltage * 100).ToString("F0");
                 lock (m_Ch1SampleDataList)
                 {
                     m_Ch1SampleDataList.Add(new SampleData(DateTime.Now, paras.pressureVoltage, -1000f));
@@ -766,6 +767,7 @@ namespace PTool
             cbToolingPort.Enabled = bEnabled;
             cbPumpPort.Enabled = bEnabled;
             tbRate.Enabled = bEnabled;
+            tbOprator.Enabled = bEnabled;
             picStart.Enabled = bEnabled;
             picStop.Enabled = !bEnabled;
 
@@ -779,7 +781,7 @@ namespace PTool
                 picStart.Image = global::PTool.Properties.Resources.icon_start_Blue;
                 picStop.Image = global::PTool.Properties.Resources.icon_stop_gray;
             }
-            if (SamplingStartOrStop!=null)
+            if (SamplingStartOrStop != null)
             {
                 SamplingStartOrStop(this, new StartOrStopArgs(bEnabled));
             }
@@ -798,7 +800,7 @@ namespace PTool
             }
             else
             {
-                title = string.Format("泵型号：{0} 产品序号:{1} 工装编号:{2}", m_LocalPid.ToString(),m_PumpNo, m_ToolingNo);
+                title = string.Format("泵型号：{0} 产品序号:{1} 工装编号:{2}", m_LocalPid.ToString(), m_PumpNo, m_ToolingNo);
             }
             var wb = new XLWorkbook();
             var ws = wb.Worksheets.Add("压力调试数据");
@@ -819,7 +821,7 @@ namespace PTool
             {
                 ws.Cell(index, 1).Value = sampleDataList[i].m_SampleTime.ToString("yyyy-MM-dd HH_mm_ss");
                 ws.Cell(index, 2).Value = sampleDataList[i].m_Weight;
-                ws.Cell(index, 3).Value = sampleDataList[i].m_PressureValue*100;
+                ws.Cell(index, 3).Value = sampleDataList[i].m_PressureValue * 100;
                 index++;
             }
             wb.SaveAs(name);
@@ -830,7 +832,7 @@ namespace PTool
         /// </summary>
         /// <param name="name"></param>
         /// <param name="caliParameters">已经生成好的数据，直接写到表格中</param>
-        private void GenReport(string name, List<PressureCalibrationParameter> caliParameters)
+        private void GenReport(string name, List<PressureCalibrationParameter> caliParameters, string nameBackup="")
         {
             if (caliParameters == null || caliParameters.Count == 0)
                 return;
@@ -875,13 +877,14 @@ namespace PTool
             ws.Cell(1, ++columnIndex).Value = "50ml低压";
             ws.Cell(1, ++columnIndex).Value = "50ml中压";
             ws.Cell(1, ++columnIndex).Value = "50ml高压";
+            ws.Cell(1, ++columnIndex).Value = "操作员";
 
             columnIndex = 0;
             ws.Cell(2, ++columnIndex).Value = m_PumpNo;
             ws.Cell(2, ++columnIndex).Value = m_LocalPid.ToString();
             ws.Cell(2, ++columnIndex).Value = m_Channel;
             ws.Cell(2, ++columnIndex).Value = m_ToolingNo;
-            ws.Cell(2, ++columnIndex).Value = m_Ch1SampleDataList.Min(x => x.m_PressureValue)*100;
+            ws.Cell(2, ++columnIndex).Value = m_Ch1SampleDataList.Min(x => x.m_PressureValue) * 100;
             float mid = PressureManager.Instance().GetMidBySizeLevel(m_LocalPid, 10, Misc.OcclusionLevel.L);
             ws.Cell(2, ++columnIndex).Value = mid == 0 ? "" : (mid).ToString("F2");
             mid = PressureManager.Instance().GetMidBySizeLevel(m_LocalPid, 10, Misc.OcclusionLevel.C);
@@ -933,9 +936,13 @@ namespace PTool
                 ws.Cell(2, ++columnIndex).Value = para.m_PressureC * 100;
                 ws.Cell(2, ++columnIndex).Value = para.m_PressureH * 100;
             }
+            ws.Cell(2, ++columnIndex).Value = tbOprator.Text;
+
             ws.Range(1, 1, 2, 1).SetDataType(XLCellValues.Text);
             ws.Range(1, 4, 2, 4).SetDataType(XLCellValues.Text);
             wb.SaveAs(name);
+            Thread.Sleep(1000);
+            File.Copy(name, nameBackup, true);
             IntPtr handle = UserMessageHelper.FindWindow(null, "压力测试工具");
             UserMessageHelper.SendMessage(handle, 0x1EE1, 0, 0);
         }
@@ -945,11 +952,11 @@ namespace PTool
         /// </summary>
         /// <param name="name"></param>
         /// <param name="sampleDataList"></param>
-        public void GenDoublePunmpReport(string name, List<List<SampleData>> sampleDataList, string tool2No = "")
+        public void GenDoublePunmpReport(string name, List<List<SampleData>> sampleDataList, string tool2No, string nameBackup = "")
         {
             if (sampleDataList == null || sampleDataList.Count < 2)
                 return;
-            List<PressureParameter> []parameters = new List<PressureParameter>[2];
+            List<PressureParameter>[] parameters = new List<PressureParameter>[2];
             parameters[0] = new List<PressureParameter>();
             parameters[1] = new List<PressureParameter>();
             PumpID pid = PumpID.None;
@@ -1008,7 +1015,7 @@ namespace PTool
             FindNearestPValue(ref parameters[0], sampleDataList[0]);
             FindNearestPValue(ref parameters[1], sampleDataList[1]);
 
-            List<PressureCalibrationParameter> []caliParameters = new List<PressureCalibrationParameter>[2];
+            List<PressureCalibrationParameter>[] caliParameters = new List<PressureCalibrationParameter>[2];
             caliParameters[0] = new List<PressureCalibrationParameter>();
             caliParameters[1] = new List<PressureCalibrationParameter>();
             foreach (var size in sizes)
@@ -1099,18 +1106,20 @@ namespace PTool
             ws.Cell(1, ++columnIndex).Value = "50ml低压";
             ws.Cell(1, ++columnIndex).Value = "50ml中压";
             ws.Cell(1, ++columnIndex).Value = "50ml高压";
+            ws.Cell(1, ++columnIndex).Value = "操作员";
+
             #endregion
 
             #region 给第一道泵进行表格赋值
-            for (int iLoop = 0; iLoop < sampleDataList.Count-1 && sampleDataList.Count == 2; iLoop++)
+            for (int iLoop = 0; iLoop < sampleDataList.Count - 1 && sampleDataList.Count == 2; iLoop++)
             {
                 columnIndex = 0;
                 ws.Cell(rowIndex, ++columnIndex).Value = m_PumpNo;
                 ws.Cell(rowIndex, ++columnIndex).Value = pid.ToString();
-                ws.Cell(rowIndex, ++columnIndex).Value = iLoop+1;
-                if(iLoop==0)
-                ws.Cell(rowIndex, ++columnIndex).Value = m_ToolingNo;
-                else if(iLoop==1)
+                ws.Cell(rowIndex, ++columnIndex).Value = iLoop + 1;
+                if (iLoop == 0)
+                    ws.Cell(rowIndex, ++columnIndex).Value = m_ToolingNo;
+                else if (iLoop == 1)
                     ws.Cell(rowIndex, ++columnIndex).Value = tool2No;
                 else
                     ws.Cell(rowIndex, ++columnIndex).Value = m_ToolingNo;
@@ -1166,6 +1175,7 @@ namespace PTool
                     ws.Cell(rowIndex, ++columnIndex).Value = para.m_PressureC * 100;
                     ws.Cell(rowIndex, ++columnIndex).Value = para.m_PressureH * 100;
                 }
+                ws.Cell(rowIndex, ++columnIndex).Value = tbOprator.Text;
                 rowIndex++;
             }
             #endregion
@@ -1235,6 +1245,8 @@ namespace PTool
                     ws.Cell(rowIndex, ++columnIndex).Value = para.m_PressureC * 100;
                     ws.Cell(rowIndex, ++columnIndex).Value = para.m_PressureH * 100;
                 }
+
+                ws.Cell(rowIndex, ++columnIndex).Value = tbOprator.Text;
                 rowIndex++;
             }
             #endregion
@@ -1242,6 +1254,8 @@ namespace PTool
             ws.Range(1, 1, rowIndex, 1).SetDataType(XLCellValues.Text);
             ws.Range(1, 4, rowIndex, 4).SetDataType(XLCellValues.Text);
             wb.SaveAs(name);
+            Thread.Sleep(1000);
+            File.Copy(name, nameBackup, true);
             sampleDataList.Clear();
             IntPtr handle = UserMessageHelper.FindWindow(null, "压力测试工具");
             UserMessageHelper.SendMessage(handle, 0x1EE1, 0, 0);
@@ -1305,7 +1319,7 @@ namespace PTool
 
             float pValue = FindZeroPValue(sampleDataList);
 
-            if ( pValue*100>= PressureForm.RangeMaxP || pValue * 100 <= PressureForm.RangeMinP )
+            if (pValue * 100 >= PressureForm.RangeMaxP || pValue * 100 <= PressureForm.RangeMinP)
             {
                 Logger.Instance().ErrorFormat("P值超范围，请重试！P值={0},最小值={1},最大值={2}", pValue, PressureForm.RangeMinP, PressureForm.RangeMaxP);
                 sampleDataList.Clear();
@@ -1341,14 +1355,12 @@ namespace PTool
                 caliParameters.Add(p);
             }
 
-            if(IsOutOfRange(caliParameters))
+            if (IsOutOfRange(caliParameters))
             {
                 sampleDataList.Clear();
                 MessageBox.Show("P值变化大，请重试！");
                 return;
             }
-
-
 
             WritePressureCaliParameter2Pump(caliParameters);
             detail.P0 = m_Ch1SampleDataList.Min(x => x.m_PressureValue) * 100;
@@ -1365,7 +1377,18 @@ namespace PTool
                 if (!System.IO.Directory.Exists(path))
                     System.IO.Directory.CreateDirectory(path);
                 string saveFileName = path + "\\" + fileName + ".xlsx";
-                GenReport(saveFileName, caliParameters);
+
+                string path2 = Path.GetDirectoryName(Assembly.GetAssembly(typeof(PressureForm)).Location) + "\\数据导出备份";
+                string fileName2 = m_PumpNo;
+                if (m_LocalPid == PumpID.GrasebyF6 || m_LocalPid == PumpID.WZS50F6)
+                    fileName2 = string.Format("{0}{1}道{2}{3}", m_LocalPid.ToString(), m_Channel, m_PumpNo, DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss"));
+                else
+                    fileName2 = string.Format("{0}{1}{2}", m_LocalPid.ToString(), m_PumpNo, DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss"));
+                if (!System.IO.Directory.Exists(path2))
+                    System.IO.Directory.CreateDirectory(path2);
+                string saveFileName2 = path2 + "\\" + fileName2 + ".xlsx";
+
+                GenReport(saveFileName, caliParameters,saveFileName2);
             }
         }
 
@@ -1440,7 +1463,7 @@ namespace PTool
             bool bRet = false;
             for (int i = 0; i < caliParas.Count; i++)
             {
-                if (caliParas[i].m_PressureL*100 >= PressureForm.PressureCalibrationMax)
+                if (caliParas[i].m_PressureL * 100 >= PressureForm.PressureCalibrationMax)
                 {
                     Logger.Instance().ErrorFormat("P值变化大，请重试！L ={0}", caliParas[i].m_PressureL);
                     bRet = true;
@@ -1459,9 +1482,9 @@ namespace PTool
                     break;
                 }
 
-                if(caliParas[i].m_PressureH <= caliParas[i].m_PressureC || caliParas[i].m_PressureC<= caliParas[i].m_PressureL || caliParas[i].m_PressureH <= caliParas[i].m_PressureL)
+                if (caliParas[i].m_PressureH <= caliParas[i].m_PressureC || caliParas[i].m_PressureC <= caliParas[i].m_PressureL || caliParas[i].m_PressureH <= caliParas[i].m_PressureL)
                 {
-                    Logger.Instance().ErrorFormat("P值异常高档位值小于低档位，请重试！{0}，{1}，{2}", caliParas[i].m_PressureL, caliParas[i].m_PressureC,caliParas[i].m_PressureH);
+                    Logger.Instance().ErrorFormat("P值异常高档位值小于低档位，请重试！{0}，{1}，{2}", caliParas[i].m_PressureL, caliParas[i].m_PressureC, caliParas[i].m_PressureH);
                     bRet = true;
                     break;
                 }
@@ -1489,9 +1512,9 @@ namespace PTool
         private bool IsValid(List<PressureParameter> parameters)
         {
             bool bRet = true;
-            foreach(var p in parameters)
+            foreach (var p in parameters)
             {
-                if (p.m_Pressure>=p.m_MidWeight*2.5)
+                if (p.m_Pressure >= p.m_MidWeight * 2.5)
                 {
                     bRet = false;
                     break;
@@ -1539,11 +1562,22 @@ namespace PTool
             m_Ch1SampleDataList.Clear();
             WavelinePanel.Invalidate();
 
-#region 参数输入检查
+            #region 参数输入检查
 
             if (SamplingStartOrStop != null)
             {
                 SamplingStartOrStop(this, new StartOrStopArgs(true));
+            }
+
+            if (string.IsNullOrEmpty(tbOprator.Text))
+            {
+                MessageBox.Show("请输入操作员工号");
+                return;
+            }
+            if (tbOprator.Text.Length != 8)
+            {
+                MessageBox.Show("请输入正确操作员工号");
+                return;
             }
 
             if (string.IsNullOrEmpty(PumpNo))
@@ -1585,9 +1619,9 @@ namespace PTool
                 MessageBox.Show("请正确输入速率！");
                 return;
             }
-#endregion
+            #endregion
 
-#region 泵型号选择
+            #region 泵型号选择
             Misc.ProductID pid = Misc.ProductID.None;
             switch (m_LocalPid)
             {
@@ -1623,15 +1657,15 @@ namespace PTool
                     pid = Misc.ProductID.None;
                     break;
             }
-#endregion
+            #endregion
 
             if (pid == Misc.ProductID.None)
             {
                 MessageBox.Show("选择的泵类型错误，请联系管理员!");
                 return;
             }
-          
-            if (m_ConnResponse!=null && m_ConnResponse.IsOpen())
+
+            if (m_ConnResponse != null && m_ConnResponse.IsOpen())
             {
                 m_ConnResponse.CloseConnection();
             }
@@ -1681,8 +1715,51 @@ namespace PTool
             this.detail.Show();
         }
 
-       
+        private void tbOprator_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox txt = sender as TextBox;
+            if (char.IsNumber(e.KeyChar) || e.KeyChar == (char)Keys.Back)
+            {
+                e.Handled = false;                         //让操作生效
+                if (txt.Text.Length >= 8)
+                {
+                    if (e.KeyChar == (char)Keys.Back)
+                        e.Handled = false;             //让操作生效
+                    else
+                        e.Handled = true;              //让操作失效，如果第一个字符是2以上，不能输入其他字符
+                }
+                else
+                {
+                    e.Handled = false;                 //让操作生效
+                }
+            }
+            else
+            {
+                e.Handled = true;
+            }
+        }
 
+        public void InputOpratorNumber(string number)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new DelegateInputOpratorNumber(InputOpratorNumber), new object[] { number });
+            }
+            else
+            {
+                this.tbOprator.Text = number;
+            }
+        }
 
+        private void tbOprator_TextChanged(object sender, EventArgs e)
+        {
+            if (this.Channel == 1)
+            {
+                if (OpratorNumberInput != null)
+                {
+                    OpratorNumberInput(this, new OpratorNumberArgs(tbOprator.Text));
+                }
+            }
+        }
     }
 }

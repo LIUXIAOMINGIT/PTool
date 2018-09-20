@@ -31,10 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PressureForm));
             this.tlpMain = new System.Windows.Forms.TableLayoutPanel();
             this.tlpTitle = new System.Windows.Forms.TableLayoutPanel();
-            this.picLogo = new System.Windows.Forms.PictureBox();
             this.lbTitle = new System.Windows.Forms.Label();
-            this.picSetting = new System.Windows.Forms.PictureBox();
-            this.picCloseWindow = new System.Windows.Forms.PictureBox();
             this.tlpParameter = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
             this.lbParaSetting = new System.Windows.Forms.Label();
@@ -48,14 +45,17 @@
             this.tlpChart = new System.Windows.Forms.TableLayoutPanel();
             this.chart1 = new PTool.Chart();
             this.chart2 = new PTool.Chart();
+            this.picLogo = new System.Windows.Forms.PictureBox();
+            this.picSetting = new System.Windows.Forms.PictureBox();
+            this.picCloseWindow = new System.Windows.Forms.PictureBox();
             this.picSplit = new System.Windows.Forms.PictureBox();
             this.tlpMain.SuspendLayout();
             this.tlpTitle.SuspendLayout();
+            this.tlpParameter.SuspendLayout();
+            this.tlpChart.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picSetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picCloseWindow)).BeginInit();
-            this.tlpParameter.SuspendLayout();
-            this.tlpChart.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picSplit)).BeginInit();
             this.SuspendLayout();
             // 
@@ -101,17 +101,6 @@
             this.tlpTitle.MouseMove += new System.Windows.Forms.MouseEventHandler(this.tlpTitle_MouseMove);
             this.tlpTitle.MouseUp += new System.Windows.Forms.MouseEventHandler(this.tlpTitle_MouseUp);
             // 
-            // picLogo
-            // 
-            this.picLogo.Image = global::PTool.Properties.Resources.icon_logo;
-            this.picLogo.Location = new System.Drawing.Point(9, 9);
-            this.picLogo.Margin = new System.Windows.Forms.Padding(9);
-            this.picLogo.Name = "picLogo";
-            this.picLogo.Size = new System.Drawing.Size(32, 25);
-            this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picLogo.TabIndex = 0;
-            this.picLogo.TabStop = false;
-            // 
             // lbTitle
             // 
             this.lbTitle.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -123,33 +112,6 @@
             this.lbTitle.Size = new System.Drawing.Size(93, 22);
             this.lbTitle.TabIndex = 1;
             this.lbTitle.Text = "压力测试1.0";
-            // 
-            // picSetting
-            // 
-            this.picSetting.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.picSetting.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picSetting.Image = global::PTool.Properties.Resources.icon_setting;
-            this.picSetting.Location = new System.Drawing.Point(943, 9);
-            this.picSetting.Margin = new System.Windows.Forms.Padding(9);
-            this.picSetting.Name = "picSetting";
-            this.picSetting.Size = new System.Drawing.Size(27, 25);
-            this.picSetting.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picSetting.TabIndex = 2;
-            this.picSetting.TabStop = false;
-            // 
-            // picCloseWindow
-            // 
-            this.picCloseWindow.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.picCloseWindow.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picCloseWindow.Image = global::PTool.Properties.Resources.close;
-            this.picCloseWindow.Location = new System.Drawing.Point(990, 11);
-            this.picCloseWindow.Margin = new System.Windows.Forms.Padding(11);
-            this.picCloseWindow.Name = "picCloseWindow";
-            this.picCloseWindow.Size = new System.Drawing.Size(23, 21);
-            this.picCloseWindow.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picCloseWindow.TabIndex = 3;
-            this.picCloseWindow.TabStop = false;
-            this.picCloseWindow.Click += new System.EventHandler(this.picCloseWindow_Click);
             // 
             // tlpParameter
             // 
@@ -266,6 +228,7 @@
             this.tbPumpNo.Name = "tbPumpNo";
             this.tbPumpNo.Size = new System.Drawing.Size(116, 31);
             this.tbPumpNo.TabIndex = 3;
+            this.tbPumpNo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbPumpNo_KeyPress);
             // 
             // tbToolingNo
             // 
@@ -333,6 +296,44 @@
             this.chart2.TabIndex = 1;
             this.chart2.ToolingNo = "";
             // 
+            // picLogo
+            // 
+            this.picLogo.Image = global::PTool.Properties.Resources.PLogo;
+            this.picLogo.Location = new System.Drawing.Point(9, 9);
+            this.picLogo.Margin = new System.Windows.Forms.Padding(9);
+            this.picLogo.Name = "picLogo";
+            this.picLogo.Size = new System.Drawing.Size(32, 25);
+            this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picLogo.TabIndex = 0;
+            this.picLogo.TabStop = false;
+            // 
+            // picSetting
+            // 
+            this.picSetting.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.picSetting.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picSetting.Image = global::PTool.Properties.Resources.icon_setting;
+            this.picSetting.Location = new System.Drawing.Point(943, 9);
+            this.picSetting.Margin = new System.Windows.Forms.Padding(9);
+            this.picSetting.Name = "picSetting";
+            this.picSetting.Size = new System.Drawing.Size(27, 25);
+            this.picSetting.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picSetting.TabIndex = 2;
+            this.picSetting.TabStop = false;
+            // 
+            // picCloseWindow
+            // 
+            this.picCloseWindow.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.picCloseWindow.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picCloseWindow.Image = global::PTool.Properties.Resources.close;
+            this.picCloseWindow.Location = new System.Drawing.Point(990, 11);
+            this.picCloseWindow.Margin = new System.Windows.Forms.Padding(11);
+            this.picCloseWindow.Name = "picCloseWindow";
+            this.picCloseWindow.Size = new System.Drawing.Size(23, 21);
+            this.picCloseWindow.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picCloseWindow.TabIndex = 3;
+            this.picCloseWindow.TabStop = false;
+            this.picCloseWindow.Click += new System.EventHandler(this.picCloseWindow_Click);
+            // 
             // picSplit
             // 
             this.picSplit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
@@ -359,12 +360,12 @@
             this.tlpMain.ResumeLayout(false);
             this.tlpTitle.ResumeLayout(false);
             this.tlpTitle.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picSetting)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picCloseWindow)).EndInit();
             this.tlpParameter.ResumeLayout(false);
             this.tlpParameter.PerformLayout();
             this.tlpChart.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picSetting)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picCloseWindow)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picSplit)).EndInit();
             this.ResumeLayout(false);
 

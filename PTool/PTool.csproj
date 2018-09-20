@@ -173,6 +173,7 @@
     <None Include="image\close_blue.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="icon\PLogo.ico" />
     <Content Include="icon_logo.ico" />
     <Content Include="logo.ico" />
     <Content Include="PLogo.ico" />

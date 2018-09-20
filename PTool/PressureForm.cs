@@ -31,7 +31,14 @@ namespace PTool
         public static int RangeMinP = 170;
         public static int RangeMaxP = 210;
         public static int PressureCalibrationMax = 418;
+        public static int SerialNumberCount = 28;               //在指定时间内连续输入字符数量不低于28个时方可认为是由条码枪输入
+        private const int INPUTSPEED = 50;//条码枪输入字符速率小于50毫秒
 
+
+        private DateTime m_CharInputTimestamp = DateTime.Now;  //定义一个成员函数用于保存每次的时间点
+        private DateTime m_FirstCharInputTimestamp = DateTime.Now;  //定义一个成员函数用于保存每次的时间点
+        private DateTime m_SecondCharInputTimestamp = DateTime.Now;  //定义一个成员函数用于保存每次的时间点
+        private int m_PressCount = 0;
 
         public PressureForm()
         {
@@ -77,6 +84,7 @@ namespace PTool
                 RangeMinP = Int32.Parse(ConfigurationManager.AppSettings.Get("RangeMinP"));
                 RangeMaxP = Int32.Parse(ConfigurationManager.AppSettings.Get("RangeMaxP"));
                 PressureCalibrationMax = Int32.Parse(ConfigurationManager.AppSettings.Get("PressureCalibrationMax"));
+                SerialNumberCount = Int32.Parse(ConfigurationManager.AppSettings.Get("SerialNumberCount"));
 
                 #region 不要从config文件读取压力参数
                 /*
@@ -344,6 +352,7 @@ namespace PTool
             chart2.SamplingStartOrStop += OnSamplingStartOrStop;
             chart1.OnSamplingComplete += OnChartSamplingComplete;
             chart2.OnSamplingComplete += OnChartSamplingComplete;
+            chart1.OpratorNumberInput += OnOpratorNumberInput;
             m_SampleDataList.Clear();
         }
 
@@ -383,7 +392,15 @@ namespace PTool
                 if (!System.IO.Directory.Exists(path))
                     System.IO.Directory.CreateDirectory(path);
                 string saveFileName = path + "\\" + fileName + ".xlsx";
-                chart1.GenDoublePunmpReport(saveFileName, m_SampleDataList, tbToolingNo2.Text);
+
+
+                string path2 = Path.GetDirectoryName(Assembly.GetAssembly(typeof(PressureForm)).Location) + "\\数据导出备份";
+                string fileName2 = string.Format("{0}_{1}_{2}", pid.ToString(), tbPumpNo.Text, DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss"));
+                if (!System.IO.Directory.Exists(path2))
+                    System.IO.Directory.CreateDirectory(path2);
+                string saveFileName2 = path2 + "\\" + fileName2 + ".xlsx";
+
+                chart1.GenDoublePunmpReport(saveFileName, m_SampleDataList, tbToolingNo2.Text, saveFileName2);
             }
         }
 
@@ -395,6 +412,17 @@ namespace PTool
             chart2.ToolingNo = tbToolingNo2.Text;
             chart1.PumpNo = tbPumpNo.Text;
             chart2.PumpNo = tbPumpNo.Text;
+        }
+
+        private void OnOpratorNumberInput(object sender, OpratorNumberArgs e)
+        {
+            Chart chart1 = sender as Chart;
+            if(chart1.Channel==1)
+            {
+                chart2.InputOpratorNumber(e.Number);
+            }
+          
+           
         }
 
         private void tlpTitle_MouseDown(object sender, MouseEventArgs e)
@@ -463,7 +491,38 @@ namespace PTool
             tbPumpNo.Clear();
         }
 
+        private void tbPumpNo_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TimeSpan ts;
+            m_SecondCharInputTimestamp = DateTime.Now;
+            ts = m_SecondCharInputTimestamp.Subtract(m_FirstCharInputTimestamp);     //获取时间间隔
+            if (ts.Milliseconds < INPUTSPEED)
+                m_PressCount++;
+            else
+            {
+                m_PressCount = 0;
+            }
 
+            if (m_PressCount == SerialNumberCount)
+            {
+                if (tbPumpNo.Text.Length >= SerialNumberCount)
+                {
+                    if (tbPumpNo.SelectionStart < tbPumpNo.Text.Length)
+                        tbPumpNo.Text = tbPumpNo.Text.Remove(tbPumpNo.SelectionStart);
+                    try
+                    {
+                        tbPumpNo.Text = tbPumpNo.Text.Substring(tbPumpNo.Text.Length - SerialNumberCount, SerialNumberCount);
+                        tbPumpNo.SelectionStart = tbPumpNo.Text.Length;
+                    }
+                    catch
+                    {
+                        tbPumpNo.Text = "";
+                    }
+                }
+                m_PressCount = 0;
+            }
+            m_FirstCharInputTimestamp = m_SecondCharInputTimestamp;
+        }
     }
 
     public class SampleData

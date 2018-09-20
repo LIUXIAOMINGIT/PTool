@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Chart));
             this.tlpMain = new System.Windows.Forms.TableLayoutPanel();
             this.tlpChannel = new System.Windows.Forms.TableLayoutPanel();
             this.picChannel = new System.Windows.Forms.PictureBox();
@@ -46,6 +45,8 @@
             this.cbToolingPort = new System.Windows.Forms.ComboBox();
             this.cbPumpPort = new System.Windows.Forms.ComboBox();
             this.tbRate = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.tbOprator = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.picStart = new System.Windows.Forms.PictureBox();
             this.picStop = new System.Windows.Forms.PictureBox();
@@ -131,9 +132,9 @@
             this.tableLayoutPanel1.ColumnCount = 5;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 19F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 24F));
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.label3, 3, 0);
             this.tableLayoutPanel1.Controls.Add(this.label4, 0, 1);
@@ -146,6 +147,8 @@
             this.tableLayoutPanel1.Controls.Add(this.cbToolingPort, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.cbPumpPort, 4, 0);
             this.tableLayoutPanel1.Controls.Add(this.tbRate, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.label9, 3, 2);
+            this.tableLayoutPanel1.Controls.Add(this.tbOprator, 4, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(100, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
@@ -173,7 +176,7 @@
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Noto Sans CJK SC Regular", 12F);
-            this.label3.Location = new System.Drawing.Point(235, 17);
+            this.label3.Location = new System.Drawing.Point(231, 17);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(58, 24);
             this.label3.TabIndex = 1;
@@ -195,7 +198,7 @@
             this.label5.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Noto Sans CJK SC Regular", 12F);
-            this.label5.Location = new System.Drawing.Point(235, 76);
+            this.label5.Location = new System.Drawing.Point(231, 76);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(68, 24);
             this.label5.TabIndex = 1;
@@ -250,7 +253,7 @@
             this.lbPValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lbPValue.AutoSize = true;
             this.lbPValue.Font = new System.Drawing.Font("Noto Sans CJK SC Bold", 16F, System.Drawing.FontStyle.Bold);
-            this.lbPValue.Location = new System.Drawing.Point(315, 72);
+            this.lbPValue.Location = new System.Drawing.Point(307, 72);
             this.lbPValue.Name = "lbPValue";
             this.lbPValue.Size = new System.Drawing.Size(55, 33);
             this.lbPValue.TabIndex = 1;
@@ -274,9 +277,9 @@
             this.cbPumpPort.BackColor = System.Drawing.Color.White;
             this.cbPumpPort.Font = new System.Drawing.Font("Noto Sans CJK SC Bold", 12F, System.Drawing.FontStyle.Bold);
             this.cbPumpPort.FormattingEnabled = true;
-            this.cbPumpPort.Location = new System.Drawing.Point(315, 13);
+            this.cbPumpPort.Location = new System.Drawing.Point(307, 13);
             this.cbPumpPort.Name = "cbPumpPort";
-            this.cbPumpPort.Size = new System.Drawing.Size(82, 32);
+            this.cbPumpPort.Size = new System.Drawing.Size(90, 32);
             this.cbPumpPort.TabIndex = 2;
             this.cbPumpPort.SelectedIndexChanged += new System.EventHandler(this.cbPumpPort_SelectedIndexChanged);
             // 
@@ -291,6 +294,30 @@
             this.tbRate.TabIndex = 3;
             this.tbRate.Text = "50";
             this.tbRate.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.OnRateKeyPress);
+            // 
+            // label9
+            // 
+            this.label9.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Noto Sans CJK SC Regular", 12F);
+            this.label9.Location = new System.Drawing.Point(231, 136);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(58, 24);
+            this.label9.TabIndex = 1;
+            this.label9.Text = "操作员";
+            // 
+            // tbOprator
+            // 
+            this.tbOprator.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbOprator.BackColor = System.Drawing.Color.White;
+            this.tbOprator.Font = new System.Drawing.Font("Noto Sans CJK SC Bold", 14F, System.Drawing.FontStyle.Bold);
+            this.tbOprator.Location = new System.Drawing.Point(304, 130);
+            this.tbOprator.Margin = new System.Windows.Forms.Padding(0);
+            this.tbOprator.Name = "tbOprator";
+            this.tbOprator.Size = new System.Drawing.Size(96, 35);
+            this.tbOprator.TabIndex = 3;
+            this.tbOprator.TextChanged += new System.EventHandler(this.tbOprator_TextChanged);
+            this.tbOprator.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbOprator_KeyPress);
             // 
             // tableLayoutPanel2
             // 
@@ -358,7 +385,7 @@
             this.tlpMain.SetColumnSpan(this.pnlChart, 2);
             this.pnlChart.Controls.Add(this.WavelinePanel);
             this.pnlChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlChart.Font = new System.Drawing.Font("Microsoft YaHei", 9F);
+            this.pnlChart.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.pnlChart.ForeColor = System.Drawing.Color.Black;
             this.pnlChart.Location = new System.Drawing.Point(0, 178);
             this.pnlChart.Margin = new System.Windows.Forms.Padding(0);
@@ -372,7 +399,7 @@
             this.WavelinePanel.BackColor = System.Drawing.Color.White;
             this.WavelinePanel.Controls.Add(this.detail);
             this.WavelinePanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.WavelinePanel.Font = new System.Drawing.Font("Microsoft YaHei", 9F);
+            this.WavelinePanel.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.WavelinePanel.ForeColor = System.Drawing.Color.Black;
             this.WavelinePanel.Location = new System.Drawing.Point(0, 0);
             this.WavelinePanel.Margin = new System.Windows.Forms.Padding(0);
@@ -384,6 +411,7 @@
             // detail
             // 
             this.detail.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(19)))), ((int)(((byte)(113)))), ((int)(((byte)(185)))));
+            this.detail.Channel = 1;
             this.detail.Location = new System.Drawing.Point(31, 123);
             this.detail.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.detail.Name = "detail";
@@ -445,5 +473,7 @@
         private System.Windows.Forms.PictureBox picDetail;
         private System.Windows.Forms.Panel pnlChart;
         private Detail detail;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TextBox tbOprator;
     }
 }

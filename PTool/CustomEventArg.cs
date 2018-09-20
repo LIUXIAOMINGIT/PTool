@@ -48,7 +48,24 @@ namespace PTool
     }
 
 
+    public class OpratorNumberArgs : EventArgs
+    {
+        private string m_Number = string.Empty;
+
+        public string Number
+        {
+            get { return m_Number; }
+            set { m_Number = value; }
+        }
+
+        public OpratorNumberArgs(string number)
+        {
+            m_Number = number;
+        }
+    }
+
+
 
 
 }
- 
+

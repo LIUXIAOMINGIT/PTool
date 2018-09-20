@@ -42,6 +42,8 @@ namespace PTool
             get { return m_Channel; }
         }
 
+        [Bindable(false), Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         /// <summary>
         /// 
         /// </summary>

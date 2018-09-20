@@ -121,8 +121,11 @@
   <data name="icon_stop_gray" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\icon_stop_gray.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="icon_logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\icon_logo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="close" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\close.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="close_blue" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\close_blue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="icon_2_gray" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\icon_2_gray.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -139,11 +142,11 @@
   <data name="icon_stop_blue" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\icon_stop_blue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="icon_2_blue" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\image\icon_2_blue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="icon_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\icon_1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="close" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\close.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="icon_setting" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\icon_setting.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -151,10 +154,7 @@
   <data name="icon_start_gray" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\image\icon_start_gray.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="icon_2_blue" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\icon_2_blue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="close_blue" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\image\close_blue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="PLogo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\PLogo.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
