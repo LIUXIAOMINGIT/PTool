@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Collections.Specialized;
@@ -26,7 +27,11 @@ namespace PTool
         private Point oldMousePosition;
         private PumpID m_LocalPid = PumpID.GrasebyC6;//默认显示的是C6
         private int m_SampleInterval = 500;//采样频率：毫秒
-        private List<List<SampleData>> m_SampleDataList = new List<List<SampleData>>();//存放双道泵上传的数据，等第二道泵结束后，一起存在一张表中
+        //private List<List<SampleData>> m_SampleDataList = new List<List<SampleData>>();//存放双道泵上传的数据，等第二道泵结束后，一起存在一张表中
+
+        private Hashtable hashSampleData = new Hashtable();//[Key=通道编号（0，1）, Value=List<SampleData>]
+
+
 
         public static int RangeMinP = 170;
         public static int RangeMaxP = 210;
@@ -353,7 +358,7 @@ namespace PTool
             chart1.OnSamplingComplete += OnChartSamplingComplete;
             chart2.OnSamplingComplete += OnChartSamplingComplete;
             chart1.OpratorNumberInput += OnOpratorNumberInput;
-            m_SampleDataList.Clear();
+            hashSampleData.Clear();
         }
 
         /// <summary>
@@ -367,11 +372,21 @@ namespace PTool
             if (e.SampleDataList != null)
             {
                 if (chart.Name == "chart1")
-                    m_SampleDataList.Insert(0, e.SampleDataList);
+                {
+                    if (hashSampleData.ContainsKey(1))
+                        hashSampleData[1] = e.SampleDataList;
+                    else
+                        hashSampleData.Add(1, e.SampleDataList);
+                }
                 else
-                    m_SampleDataList.Add(e.SampleDataList);
+                {
+                    if (hashSampleData.ContainsKey(2))
+                        hashSampleData[2] = e.SampleDataList;
+                    else
+                        hashSampleData.Add(2, e.SampleDataList);
+                }
             }
-            if(m_SampleDataList.Count>=2)
+            if(hashSampleData.Count>=2)
             {
                 //写入excel,调用chart类中函数
                 string path = Path.GetDirectoryName(Assembly.GetAssembly(typeof(PressureForm)).Location) + "\\数据导出";
@@ -400,7 +415,15 @@ namespace PTool
                     System.IO.Directory.CreateDirectory(path2);
                 string saveFileName2 = path2 + "\\" + fileName2 + ".xlsx";
 
-                chart1.GenDoublePunmpReport(saveFileName, m_SampleDataList, tbToolingNo2.Text, saveFileName2);
+                List<List<SampleData>> sampleDataList = new List<List<SampleData>>();
+                if(hashSampleData.ContainsKey(1))
+                    sampleDataList.Add(hashSampleData[1] as List<SampleData>);
+                if (hashSampleData.ContainsKey(2))
+                    sampleDataList.Add(hashSampleData[2] as List<SampleData>);
+                if (sampleDataList.Count == 2)
+                    chart1.GenDoublePunmpReport(saveFileName, sampleDataList, tbToolingNo2.Text, saveFileName2);
+                else
+                    Logger.Instance().ErrorFormat("双道泵保存数据异常，由于结果数量不等于2，无法保存Count={0}", sampleDataList.Count);
             }
         }
 

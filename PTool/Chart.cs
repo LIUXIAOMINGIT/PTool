@@ -1354,13 +1354,25 @@ namespace PTool
                 }
                 caliParameters.Add(p);
             }
-
+#if DEBUG
+            if (this.Channel==1)
+            {
+                if (IsOutOfRange(caliParameters))
+                {
+                    sampleDataList.Clear();
+                    MessageBox.Show("P值变化大，请重试！");
+                    return;
+                }
+            }
+#else
             if (IsOutOfRange(caliParameters))
             {
                 sampleDataList.Clear();
                 MessageBox.Show("P值变化大，请重试！");
                 return;
             }
+#endif
+          
 
             WritePressureCaliParameter2Pump(caliParameters);
             detail.P0 = m_Ch1SampleDataList.Min(x => x.m_PressureValue) * 100;
@@ -1585,6 +1597,14 @@ namespace PTool
                 MessageBox.Show("请输入产品序号");
                 return;
             }
+
+            if (PumpNo.Length != PressureForm.SerialNumberCount)
+            {
+                string message = string.Format("产品序号长度不等于{0}位", PressureForm.SerialNumberCount);
+                MessageBox.Show(message);
+                return;
+            }
+
             float weight = 0;
             float rate = 0;
 
