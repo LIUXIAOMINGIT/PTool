@@ -1355,15 +1355,15 @@ namespace PTool
                 caliParameters.Add(p);
             }
 #if DEBUG
-            if (this.Channel==1)
-            {
-                if (IsOutOfRange(caliParameters))
-                {
-                    sampleDataList.Clear();
-                    MessageBox.Show("P值变化大，请重试！");
-                    return;
-                }
-            }
+            //if (this.Channel==1)
+            //{
+            //    if (IsOutOfRange(caliParameters))
+            //    {
+            //        sampleDataList.Clear();
+            //        MessageBox.Show("P值变化大，请重试！");
+            //        return;
+            //    }
+            //}
 #else
             if (IsOutOfRange(caliParameters))
             {

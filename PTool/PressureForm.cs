@@ -424,6 +424,8 @@ namespace PTool
                     chart1.GenDoublePunmpReport(saveFileName, sampleDataList, tbToolingNo2.Text, saveFileName2);
                 else
                     Logger.Instance().ErrorFormat("双道泵保存数据异常，由于结果数量不等于2，无法保存Count={0}", sampleDataList.Count);
+                Thread.Sleep(2000);
+                hashSampleData.Clear();
             }
         }
 

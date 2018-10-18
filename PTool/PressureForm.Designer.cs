@@ -36,15 +36,15 @@
             this.picSetting = new System.Windows.Forms.PictureBox();
             this.picCloseWindow = new System.Windows.Forms.PictureBox();
             this.tlpParameter = new System.Windows.Forms.TableLayoutPanel();
-            this.label1 = new System.Windows.Forms.Label();
-            this.lbParaSetting = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.cbPumpType = new System.Windows.Forms.ComboBox();
-            this.tbPumpNo = new System.Windows.Forms.TextBox();
             this.tbToolingNo = new System.Windows.Forms.TextBox();
             this.tbToolingNo2 = new System.Windows.Forms.TextBox();
+            this.tbPumpNo = new System.Windows.Forms.TextBox();
+            this.cbPumpType = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.lbParaSetting = new System.Windows.Forms.Label();
             this.tlpChart = new System.Windows.Forms.TableLayoutPanel();
             this.chart1 = new PTool.Chart();
             this.chart2 = new PTool.Chart();
@@ -184,43 +184,6 @@
             this.tlpParameter.Size = new System.Drawing.Size(1024, 73);
             this.tlpParameter.TabIndex = 1;
             // 
-            // label1
-            // 
-            this.label1.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Noto Sans CJK SC Regular", 12F);
-            this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(190, 6);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(74, 24);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "机器型号";
-            // 
-            // lbParaSetting
-            // 
-            this.lbParaSetting.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.lbParaSetting.AutoSize = true;
-            this.lbParaSetting.Font = new System.Drawing.Font("Noto Sans CJK SC Regular", 12F);
-            this.lbParaSetting.ForeColor = System.Drawing.Color.White;
-            this.lbParaSetting.Location = new System.Drawing.Point(83, 24);
-            this.lbParaSetting.Name = "lbParaSetting";
-            this.tlpParameter.SetRowSpan(this.lbParaSetting, 2);
-            this.lbParaSetting.Size = new System.Drawing.Size(90, 24);
-            this.lbParaSetting.TabIndex = 0;
-            this.lbParaSetting.Text = "泵参数设置";
-            // 
-            // label2
-            // 
-            this.label2.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Noto Sans CJK SC Regular", 12F);
-            this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(190, 42);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(74, 24);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "产品序号";
-            // 
             // label3
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.None;
@@ -245,34 +208,6 @@
             this.label4.TabIndex = 1;
             this.label4.Text = "工装编号2";
             // 
-            // cbPumpType
-            // 
-            this.cbPumpType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbPumpType.BackColor = System.Drawing.SystemColors.MenuHighlight;
-            this.tlpParameter.SetColumnSpan(this.cbPumpType, 2);
-            this.cbPumpType.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.cbPumpType.Font = new System.Drawing.Font("Noto Sans CJK SC Bold", 12F, System.Drawing.FontStyle.Bold);
-            this.cbPumpType.ForeColor = System.Drawing.Color.White;
-            this.cbPumpType.FormattingEnabled = true;
-            this.cbPumpType.Location = new System.Drawing.Point(280, 3);
-            this.cbPumpType.Name = "cbPumpType";
-            this.cbPumpType.Size = new System.Drawing.Size(311, 32);
-            this.cbPumpType.TabIndex = 2;
-            this.cbPumpType.SelectedIndexChanged += new System.EventHandler(this.cbPumpType_SelectedIndexChanged);
-            // 
-            // tbPumpNo
-            // 
-            this.tbPumpNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbPumpNo.BackColor = System.Drawing.SystemColors.MenuHighlight;
-            this.tlpParameter.SetColumnSpan(this.tbPumpNo, 2);
-            this.tbPumpNo.Font = new System.Drawing.Font("Noto Sans CJK SC Bold", 12F, System.Drawing.FontStyle.Bold);
-            this.tbPumpNo.ForeColor = System.Drawing.Color.White;
-            this.tbPumpNo.Location = new System.Drawing.Point(280, 39);
-            this.tbPumpNo.Name = "tbPumpNo";
-            this.tbPumpNo.Size = new System.Drawing.Size(311, 31);
-            this.tbPumpNo.TabIndex = 3;
-            this.tbPumpNo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbPumpNo_KeyPress);
-            // 
             // tbToolingNo
             // 
             this.tbToolingNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
@@ -296,6 +231,71 @@
             this.tbToolingNo2.Name = "tbToolingNo2";
             this.tbToolingNo2.Size = new System.Drawing.Size(212, 31);
             this.tbToolingNo2.TabIndex = 3;
+            // 
+            // tbPumpNo
+            // 
+            this.tbPumpNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbPumpNo.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.tlpParameter.SetColumnSpan(this.tbPumpNo, 2);
+            this.tbPumpNo.Font = new System.Drawing.Font("Noto Sans CJK SC Bold", 12F, System.Drawing.FontStyle.Bold);
+            this.tbPumpNo.ForeColor = System.Drawing.Color.White;
+            this.tbPumpNo.Location = new System.Drawing.Point(280, 39);
+            this.tbPumpNo.Name = "tbPumpNo";
+            this.tbPumpNo.Size = new System.Drawing.Size(311, 31);
+            this.tbPumpNo.TabIndex = 3;
+            this.tbPumpNo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbPumpNo_KeyPress);
+            // 
+            // cbPumpType
+            // 
+            this.cbPumpType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbPumpType.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.tlpParameter.SetColumnSpan(this.cbPumpType, 2);
+            this.cbPumpType.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cbPumpType.Font = new System.Drawing.Font("Noto Sans CJK SC Bold", 12F, System.Drawing.FontStyle.Bold);
+            this.cbPumpType.ForeColor = System.Drawing.Color.White;
+            this.cbPumpType.FormattingEnabled = true;
+            this.cbPumpType.Location = new System.Drawing.Point(280, 3);
+            this.cbPumpType.Name = "cbPumpType";
+            this.cbPumpType.Size = new System.Drawing.Size(311, 32);
+            this.cbPumpType.TabIndex = 2;
+            this.cbPumpType.SelectedIndexChanged += new System.EventHandler(this.cbPumpType_SelectedIndexChanged);
+            // 
+            // label2
+            // 
+            this.label2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Noto Sans CJK SC Regular", 12F);
+            this.label2.ForeColor = System.Drawing.Color.White;
+            this.label2.Location = new System.Drawing.Point(190, 42);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(74, 24);
+            this.label2.TabIndex = 1;
+            this.label2.Text = "产品序号";
+            // 
+            // label1
+            // 
+            this.label1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Noto Sans CJK SC Regular", 12F);
+            this.label1.ForeColor = System.Drawing.Color.White;
+            this.label1.Location = new System.Drawing.Point(190, 6);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(74, 24);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "机器型号";
+            // 
+            // lbParaSetting
+            // 
+            this.lbParaSetting.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lbParaSetting.AutoSize = true;
+            this.lbParaSetting.Font = new System.Drawing.Font("Noto Sans CJK SC Regular", 12F);
+            this.lbParaSetting.ForeColor = System.Drawing.Color.White;
+            this.lbParaSetting.Location = new System.Drawing.Point(83, 24);
+            this.lbParaSetting.Name = "lbParaSetting";
+            this.tlpParameter.SetRowSpan(this.lbParaSetting, 2);
+            this.lbParaSetting.Size = new System.Drawing.Size(90, 24);
+            this.lbParaSetting.TabIndex = 0;
+            this.lbParaSetting.Text = "泵参数设置";
             // 
             // tlpChart
             // 

@@ -241,10 +241,10 @@
             // 
             this.lbWeight.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lbWeight.AutoSize = true;
-            this.lbWeight.Font = new System.Drawing.Font("Noto Sans CJK SC Bold", 16F, System.Drawing.FontStyle.Bold);
-            this.lbWeight.Location = new System.Drawing.Point(83, 72);
+            this.lbWeight.Font = new System.Drawing.Font("Noto Sans CJK SC Bold", 14F, System.Drawing.FontStyle.Bold);
+            this.lbWeight.Location = new System.Drawing.Point(83, 74);
             this.lbWeight.Name = "lbWeight";
-            this.lbWeight.Size = new System.Drawing.Size(55, 33);
+            this.lbWeight.Size = new System.Drawing.Size(47, 28);
             this.lbWeight.TabIndex = 1;
             this.lbWeight.Text = "-----";
             // 
@@ -252,10 +252,10 @@
             // 
             this.lbPValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lbPValue.AutoSize = true;
-            this.lbPValue.Font = new System.Drawing.Font("Noto Sans CJK SC Bold", 16F, System.Drawing.FontStyle.Bold);
-            this.lbPValue.Location = new System.Drawing.Point(307, 72);
+            this.lbPValue.Font = new System.Drawing.Font("Noto Sans CJK SC Bold", 14F, System.Drawing.FontStyle.Bold);
+            this.lbPValue.Location = new System.Drawing.Point(307, 74);
             this.lbPValue.Name = "lbPValue";
-            this.lbPValue.Size = new System.Drawing.Size(55, 33);
+            this.lbPValue.Size = new System.Drawing.Size(47, 28);
             this.lbPValue.TabIndex = 1;
             this.lbPValue.Text = "-----";
             // 
