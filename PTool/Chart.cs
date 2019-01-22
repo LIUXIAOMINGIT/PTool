@@ -74,6 +74,14 @@ namespace PTool
         public event EventHandler<DoublePumpDataArgs> OnSamplingComplete;
         public event EventHandler<OpratorNumberArgs> OpratorNumberInput;
 
+        private int mCurrentSamplingIndex = 0;//当前采样点
+
+        private System.Timers.Timer mSamplingPointTimer = new System.Timers.Timer();
+        private bool mSamplingPointStart = false;//是否开始采样了
+        private int mSamplingCount = 0;//采样了几次，三次即可
+        private List<SampleData> mSamplingPointList = new List<SampleData>();//6个采样点的数据
+
+
 
         /// <summary>
         /// 采样间隔
@@ -147,7 +155,11 @@ namespace PTool
             cbToolingPort.Items.AddRange(SerialPort.GetPortNames());
             m_Ch1Timer.Interval = m_SampleInterval;
             m_Ch1Timer.Elapsed += OnChannel1Timer_Elapsed;
+
+            mSamplingPointTimer.Interval = 500;
+            mSamplingPointTimer.Elapsed += OnSamplingPointTimer_Elapsed; 
         }
+
 
         public void AddHandler(int channel = 1)
         {
@@ -195,6 +207,36 @@ namespace PTool
             }
         }
 
+        private void StartSamplingPointTimer()
+        {
+            //时钟开启后5秒钟才能
+            StopSamplingPointTimer();
+            mSamplingPointStart = true;
+            mSamplingPointTimer.Start();
+        }
+
+        private void StopSamplingPointTimer()
+        {
+            mSamplingCount = 0;
+            mSamplingPointStart = false;
+            mSamplingPointTimer.Stop();
+        }
+        private void OnSamplingPointTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if(mSamplingCount>=3)
+            {
+                StopSamplingPointTimer();
+                StartCh1Timer();
+                m_ConnResponse.SetStartControl();
+                return;
+            }
+            if(mSamplingPointStart)
+            {
+                m_ConnResponse.GetPressureSensor();
+                mSamplingCount++;
+            }
+        }
+
         #endregion
 
         public void SetPid(PumpID pid)
@@ -237,6 +279,26 @@ namespace PTool
         private void OnPTool_DeviceDataRecerived(object sender, EventArgs e)
         {
             PToolingDataEventArgs args = e as PToolingDataEventArgs;
+
+            //采样数据，输出
+            if (mSamplingPointStart)
+            {
+                System.Diagnostics.Debug.Write("工装的公斤值：");
+                System.Diagnostics.Debug.WriteLine(args.Weight.ToString("F3"));
+                //先取最后一次采样数据
+                if (mSamplingCount == 2)
+                {
+                    lock (mSamplingPointList)
+                    {
+                        if (mSamplingPointList.Count > 0)
+                        {
+                            SampleData sp = mSamplingPointList[mSamplingPointList.Count - 1];
+                            sp.m_Weight = args.Weight;
+                        }
+                    }
+                }
+             }
+
             lock (m_Ch1SampleDataList)
             {
                 if (m_Ch1SampleDataList.Count > 0)
@@ -245,6 +307,19 @@ namespace PTool
                     sp.m_Weight = args.Weight;
                 }
             }
+
+            if(mCurrentSamplingIndex < PressureForm.SamplingPoints.Count && mCurrentSamplingIndex >=0)
+            {
+                if(args.Weight>=PressureForm.SamplingPoints[mCurrentSamplingIndex])
+                {
+                    StopCh1Timer();
+                    m_ConnResponse.SetStopControl(GlobalResponse.CommandPriority.High);
+                    Thread.Sleep(5000);
+                    StartSamplingPointTimer();
+                    mCurrentSamplingIndex++;
+                }
+            }
+
             SetWeightValue(args.Weight, false);
             DrawSingleAccuracyMap();
             //当采集到的重量大于配置参数时，可以停止采集，并计算相关数据写入到泵中
@@ -321,7 +396,8 @@ namespace PTool
                     m_ConnResponse.SetStopControl(GlobalResponse.CommandPriority.High);
                     //RemoveHandler();
                     Thread.Sleep(500);
-                    CalcuatePressure(m_LocalPid, m_Ch1SampleDataList);
+                    //CalcuatePressure(m_LocalPid, m_Ch1SampleDataList);以后采用一次方程计算
+                    CalcuatePressureBySlope(m_LocalPid, m_Ch1SampleDataList);
                     if (m_LocalPid == PumpID.GrasebyF6_2 || m_LocalPid == PumpID.WZS50F6_2)
                     {
                         if (OnSamplingComplete != null && m_Ch1SampleDataList != null && m_Ch1SampleDataList.Count > 0)
@@ -664,6 +740,22 @@ namespace PTool
             {
                 Misc.PressureSensorInfo paras = args.EventData;
                 lbPValue.Text = (paras.pressureVoltage * 100).ToString("F0");
+
+                //采样数据，输出
+                if(mSamplingPointStart)
+                {
+                    System.Diagnostics.Debug.Write("泵的P值：");
+                    System.Diagnostics.Debug.WriteLine((paras.pressureVoltage * 100).ToString("F0"));
+                    if (mSamplingCount == 2)
+                    {
+                        lock (mSamplingPointList)
+                        {
+                            mSamplingPointList.Add(new SampleData(DateTime.Now, paras.pressureVoltage, -1000f));
+                        }
+                    }
+                }
+
+
                 lock (m_Ch1SampleDataList)
                 {
                     m_Ch1SampleDataList.Add(new SampleData(DateTime.Now, paras.pressureVoltage, -1000f));
@@ -1568,10 +1660,12 @@ namespace PTool
 
         private void picStart_Click(object sender, EventArgs e)
         {
+            mCurrentSamplingIndex = 0;
             detail.P0 = 0f;
             detail.CaliParameters.Clear();
             detail.ClearLabelValue();
             m_Ch1SampleDataList.Clear();
+            mSamplingPointList.Clear();
             WavelinePanel.Invalidate();
 
             #region 参数输入检查
@@ -1726,6 +1820,7 @@ namespace PTool
 
         private void picStop_Click(object sender, EventArgs e)
         {
+            mCurrentSamplingIndex = 0;
             Complete();
             EnableContols(true);
         }
@@ -1781,5 +1876,191 @@ namespace PTool
                 }
             }
         }
+
+
+        #region 一次方程计算压力P值
+
+        /// <summary>
+        /// 计算一次方程的a和b，需要两个点
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <param name="x2"></param>
+        /// <param name="y2"></param>
+        /// <returns></returns>
+        private Tuple<double, double> CalculateSlope(double x1, double y1, double x2, double y2)
+        {
+            double a = (y2 - y1) / (x2 - x1);
+            double b = y2 - (a * x2);
+            Tuple<double, double> slope = new Tuple<double, double>(a ,b);
+            return slope;
+        }
+
+        /// <summary>
+        /// 根据一次方程计算泵的P值
+        /// </summary>
+        /// <param name="pid"></param>
+        /// <param name="sampleDataList"></param>
+        private void CalcuatePressureBySlope(PumpID pid, List<SampleData> sampleDataList)
+        {
+            if (sampleDataList == null || sampleDataList.Count == 0)
+                return;
+            if (m_Channel == 1)
+            {
+                switch (pid)
+                {
+                    case PumpID.GrasebyF6_2:
+                        pid = PumpID.GrasebyF6;
+                        break;
+                    case PumpID.WZS50F6_2:
+                        pid = PumpID.WZS50F6;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            List<PressureParameter> parameters = new List<PressureParameter>();
+            ProductPressure pp = PressureManager.Instance().GetPressureByProductID(pid);
+            if (pp == null)
+                return;
+            List<LevelPressure> lps = pp.GetLevelPressureList();
+            List<float> midWeights = new List<float>();
+            List<int> sizes = new List<int>();
+            if (pid == PumpID.WZS50F6 || pid == PumpID.GrasebyF6 || pid == PumpID.GrasebyF6_2 || pid == PumpID.WZS50F6_2)
+                sizes.Add(10);
+            sizes.Add(20);
+            sizes.Add(30);
+            sizes.Add(50);
+
+            foreach (var size in sizes)
+            {
+                foreach (Misc.OcclusionLevel level in Enum.GetValues(typeof(Misc.OcclusionLevel)))
+                {
+                    LevelPressure lp = lps.Find((x) => { return x.m_Level == level; });
+                    if (lp != null)
+                    {
+                        SizePressure sp = lp.Find(size);
+                        if (sp != null)
+                        {
+                            PressureParameter para = new PressureParameter(size, level, sp.m_Mid, 0);
+                            parameters.Add(para);
+                        }
+                    }
+                }
+            }
+
+            //计算相关的值，一次方程
+            CalcuatePValue(ref parameters);
+
+            if (!IsValidEx(sampleDataList))
+            {
+                sampleDataList.Clear();
+                MessageBox.Show("测量数据异常，请重试！");
+                return;
+            }
+
+            float pValue = FindZeroPValue(sampleDataList);
+
+            if (pValue * 100 >= PressureForm.RangeMaxP || pValue * 100 <= PressureForm.RangeMinP)
+            {
+                Logger.Instance().ErrorFormat("P值超范围，请重试！P值={0},最小值={1},最大值={2}", pValue, PressureForm.RangeMinP, PressureForm.RangeMaxP);
+                sampleDataList.Clear();
+                MessageBox.Show("P值超范围，请重试！");
+                return;
+            }
+
+            WritePValue2Pump(pValue);
+            Logger.Instance().InfoFormat("测量结束，P值为{0}", pValue);
+
+            List<PressureCalibrationParameter> caliParameters = new List<PressureCalibrationParameter>();
+            foreach (var size in sizes)
+            {
+                PressureCalibrationParameter p = new PressureCalibrationParameter();
+                p.m_SyringeSize = size;
+                List<PressureParameter> findobjs = parameters.FindAll((x) => { return x.m_SyringeSize == size; });
+                foreach (var obj in findobjs)
+                {
+                    switch (obj.m_Level)
+                    {
+                        case Misc.OcclusionLevel.L:
+                            p.m_PressureL = obj.m_Pressure;
+                            break;
+                        case Misc.OcclusionLevel.C:
+                            p.m_PressureC = obj.m_Pressure;
+                            break;
+                        case Misc.OcclusionLevel.H:
+                            p.m_PressureH = obj.m_Pressure;
+                            break;
+                        default: break;
+                    }
+                }
+                caliParameters.Add(p);
+            }
+#if DEBUG
+            //if (this.Channel==1)
+            //{
+            //    if (IsOutOfRange(caliParameters))
+            //    {
+            //        sampleDataList.Clear();
+            //        MessageBox.Show("P值变化大，请重试！");
+            //        return;
+            //    }
+            //}
+#else
+            if (IsOutOfRange(caliParameters))
+            {
+                sampleDataList.Clear();
+                MessageBox.Show("P值变化大，请重试！");
+                return;
+            }
+#endif
+
+
+            WritePressureCaliParameter2Pump(caliParameters);
+            detail.P0 = m_Ch1SampleDataList.Min(x => x.m_PressureValue) * 100;
+            detail.CaliParameters = caliParameters;
+            //如果是单泵，则调用下列代码
+            if (m_LocalPid != PumpID.GrasebyF6_2 && m_LocalPid != PumpID.WZS50F6_2)
+            {
+                string path = Path.GetDirectoryName(Assembly.GetAssembly(typeof(PressureForm)).Location) + "\\数据导出";
+                string fileName = m_PumpNo;
+                if (m_LocalPid == PumpID.GrasebyF6 || m_LocalPid == PumpID.WZS50F6)
+                    fileName = string.Format("{0}{1}道{2}{3}", m_LocalPid.ToString(), m_Channel, m_PumpNo, DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss"));
+                else
+                    fileName = string.Format("{0}{1}{2}", m_LocalPid.ToString(), m_PumpNo, DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss"));
+                if (!System.IO.Directory.Exists(path))
+                    System.IO.Directory.CreateDirectory(path);
+                string saveFileName = path + "\\" + fileName + ".xlsx";
+
+                string path2 = Path.GetDirectoryName(Assembly.GetAssembly(typeof(PressureForm)).Location) + "\\数据导出备份";
+                string fileName2 = m_PumpNo;
+                if (m_LocalPid == PumpID.GrasebyF6 || m_LocalPid == PumpID.WZS50F6)
+                    fileName2 = string.Format("{0}{1}道{2}{3}", m_LocalPid.ToString(), m_Channel, m_PumpNo, DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss"));
+                else
+                    fileName2 = string.Format("{0}{1}{2}", m_LocalPid.ToString(), m_PumpNo, DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss"));
+                if (!System.IO.Directory.Exists(path2))
+                    System.IO.Directory.CreateDirectory(path2);
+                string saveFileName2 = path2 + "\\" + fileName2 + ".xlsx";
+
+                GenReport(saveFileName, caliParameters, saveFileName2);
+            }
+        }
+
+        private void CalcuatePValue(ref List<PressureParameter> parameters)
+        {
+            int pointCount = mSamplingPointList.Count;
+            if (pointCount < 6)
+            {
+                MessageBox.Show("采样点太少，无法计算一次方程斜率！");
+                return;
+            }
+            Tuple<double, double> slope = CalculateSlope(mSamplingPointList[1].m_Weight, mSamplingPointList[1].m_PressureValue, mSamplingPointList[3].m_Weight, mSamplingPointList[3].m_PressureValue);
+
+            foreach(var item in parameters)
+            {
+                item.m_Pressure = (float)slope.Item1 * item.m_MidWeight + (float)slope.Item2;
+            }
+        }
+        #endregion
     }
 }

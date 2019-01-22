@@ -37,8 +37,12 @@ namespace PTool
         public static int RangeMaxP = 210;
         public static int PressureCalibrationMax = 418;
         public static int SerialNumberCount = 28;               //在指定时间内连续输入字符数量不低于28个时方可认为是由条码枪输入
-        private const int INPUTSPEED = 50;//条码枪输入字符速率小于50毫秒
+        public static List<double> SamplingPoints = new List<double>();//采样点大概7个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
 
+
+
+        private const int INPUTSPEED = 50;//条码枪输入字符速率小于50毫秒
+        
 
         private DateTime m_CharInputTimestamp = DateTime.Now;  //定义一个成员函数用于保存每次的时间点
         private DateTime m_FirstCharInputTimestamp = DateTime.Now;  //定义一个成员函数用于保存每次的时间点
@@ -90,7 +94,14 @@ namespace PTool
                 RangeMaxP = Int32.Parse(ConfigurationManager.AppSettings.Get("RangeMaxP"));
                 PressureCalibrationMax = Int32.Parse(ConfigurationManager.AppSettings.Get("PressureCalibrationMax"));
                 SerialNumberCount = Int32.Parse(ConfigurationManager.AppSettings.Get("SerialNumberCount"));
+                var samplingPoint = ConfigurationManager.AppSettings.Get("SamplingPoint");
 
+                string[] strSamplingPoints = samplingPoint.Trim().Split(',');
+                SamplingPoints.Clear();
+                foreach (string s in strSamplingPoints)
+                {
+                    SamplingPoints.Add(double.Parse(s));
+                }
                 #region 不要从config文件读取压力参数
                 /*
                 #region 读GrasebyC6压力范围

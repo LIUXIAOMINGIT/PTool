@@ -71,6 +71,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChartEx.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ChartEx.Designer.cs">
+      <DependentUpon>ChartEx.cs</DependentUpon>
+    </Compile>
     <Compile Include="Chart.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -96,6 +102,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PressureManager.cs" />
     <Compile Include="UserMessageHelper.cs" />
+    <EmbeddedResource Include="ChartEx.resx">
+      <DependentUpon>ChartEx.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Chart.resx">
       <DependentUpon>Chart.cs</DependentUpon>
     </EmbeddedResource>
