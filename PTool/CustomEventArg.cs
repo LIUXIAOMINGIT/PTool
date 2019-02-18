@@ -28,19 +28,29 @@ namespace PTool
     /// </summary>
     public class DoublePumpDataArgs : EventArgs
     {
-        private List<SampleData> m_SampleDataList = new List<SampleData>();
+        private List<PressureCalibrationParameter> m_SampleDataList = new List<PressureCalibrationParameter>();
 
-        public List<SampleData> SampleDataList
+        public List<PressureCalibrationParameter> SampleDataList
         {
             get { return m_SampleDataList; }
             set { m_SampleDataList = value; }
         }
 
-        public DoublePumpDataArgs(List<SampleData> dataList)
+        //public DoublePumpDataArgs(List<SampleData> dataList)
+        //{
+        //    foreach (var data in dataList)
+        //    {
+        //        SampleData obj = new SampleData();
+        //        obj.Copy(data);
+        //        m_SampleDataList.Add(obj);
+        //    }
+        //}
+
+        public DoublePumpDataArgs(List<PressureCalibrationParameter> dataList)
         {
             foreach (var data in dataList)
             {
-                SampleData obj = new SampleData();
+                PressureCalibrationParameter obj = new PressureCalibrationParameter();
                 obj.Copy(data);
                 m_SampleDataList.Add(obj);
             }

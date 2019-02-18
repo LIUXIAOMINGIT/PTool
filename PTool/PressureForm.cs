@@ -29,7 +29,7 @@ namespace PTool
         private int m_SampleInterval = 500;//采样频率：毫秒
         //private List<List<SampleData>> m_SampleDataList = new List<List<SampleData>>();//存放双道泵上传的数据，等第二道泵结束后，一起存在一张表中
 
-        private Hashtable hashSampleData = new Hashtable();//[Key=通道编号（0，1）, Value=List<SampleData>]
+        private Hashtable hashSampleData = new Hashtable();//[Key=通道编号（0，1）, Value=List<PressureCalibrationParameter>]
 
 
 
@@ -426,11 +426,11 @@ namespace PTool
                     System.IO.Directory.CreateDirectory(path2);
                 string saveFileName2 = path2 + "\\" + fileName2 + ".xlsx";
 
-                List<List<SampleData>> sampleDataList = new List<List<SampleData>>();
+                List<List<PressureCalibrationParameter>> sampleDataList = new List<List<PressureCalibrationParameter>>();
                 if(hashSampleData.ContainsKey(1))
-                    sampleDataList.Add(hashSampleData[1] as List<SampleData>);
+                    sampleDataList.Add(hashSampleData[1] as List<PressureCalibrationParameter>);
                 if (hashSampleData.ContainsKey(2))
-                    sampleDataList.Add(hashSampleData[2] as List<SampleData>);
+                    sampleDataList.Add(hashSampleData[2] as List<PressureCalibrationParameter>);
                 if (sampleDataList.Count == 2)
                     chart1.GenDoublePunmpReport(saveFileName, sampleDataList, tbToolingNo2.Text, saveFileName2);
                 else

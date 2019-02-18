@@ -209,6 +209,7 @@ namespace PTool
     [Serializable]
     public class PressureCalibrationParameter
     {
+        public float m_P0;
         public int m_SyringeSize; //注射器尺寸
         public float m_PressureL;   //L
         public float m_PressureC;   //C
@@ -219,12 +220,22 @@ namespace PTool
 
         }
 
-        public PressureCalibrationParameter(int syringeSize, float pressureL, float pressureC, float pressureH)
+        public PressureCalibrationParameter(int syringeSize, float pressureL, float pressureC, float pressureH, float p0)
         {
             m_SyringeSize = syringeSize;
             m_PressureL = pressureL;
             m_PressureC = pressureC;
             m_PressureH = pressureH;
+            this.m_P0 = p0;
+        }
+
+        public void Copy(PressureCalibrationParameter other)
+        {
+            this.m_SyringeSize = other.m_SyringeSize;
+            this.m_PressureL = other.m_PressureL;
+            this.m_PressureC = other.m_PressureC;
+            this.m_PressureH = other.m_PressureH;
+            this.m_P0 = other.m_P0;
         }
 
     }

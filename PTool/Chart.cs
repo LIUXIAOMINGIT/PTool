@@ -397,11 +397,11 @@ namespace PTool
                     //RemoveHandler();
                     Thread.Sleep(500);
                     //CalcuatePressure(m_LocalPid, m_Ch1SampleDataList);以后采用一次方程计算
-                    CalcuatePressureBySlope(m_LocalPid, m_Ch1SampleDataList);
+                    List<PressureCalibrationParameter> caliParameters = CalcuatePressureBySlope(m_LocalPid, m_Ch1SampleDataList);
                     if (m_LocalPid == PumpID.GrasebyF6_2 || m_LocalPid == PumpID.WZS50F6_2)
                     {
-                        if (OnSamplingComplete != null && m_Ch1SampleDataList != null && m_Ch1SampleDataList.Count > 0)
-                            OnSamplingComplete(this, new DoublePumpDataArgs(m_Ch1SampleDataList));
+                        if (OnSamplingComplete != null && caliParameters != null && caliParameters.Count > 0)
+                            OnSamplingComplete(this, new DoublePumpDataArgs(caliParameters));
                     }
                     Thread.Sleep(500);
                     m_ConnResponse.CloseConnection();
@@ -1044,14 +1044,11 @@ namespace PTool
         /// </summary>
         /// <param name="name"></param>
         /// <param name="sampleDataList"></param>
-        public void GenDoublePunmpReport(string name, List<List<SampleData>> sampleDataList, string tool2No, string nameBackup = "")
+        public void GenDoublePunmpReport(string name, List<List<PressureCalibrationParameter>> sampleDataList, string tool2No, string nameBackup = "")
         {
             if (sampleDataList == null || sampleDataList.Count < 2)
                 return;
-            List<PressureParameter>[] parameters = new List<PressureParameter>[2];
-            parameters[0] = new List<PressureParameter>();
-            parameters[1] = new List<PressureParameter>();
-            PumpID pid = PumpID.None;
+PumpID pid = PumpID.None;
             switch (m_LocalPid)
             {
                 case PumpID.GrasebyF6_2:
@@ -1064,7 +1061,15 @@ namespace PTool
                     pid = m_LocalPid;
                     break;
             }
-            PumpID pid2 = m_LocalPid;
+PumpID pid2 = m_LocalPid;
+
+
+            /*
+            List<PressureParameter>[] parameters = new List<PressureParameter>[2];
+            parameters[0] = new List<PressureParameter>();
+            parameters[1] = new List<PressureParameter>();
+            
+            
             //第一道泵的压力参数
             ProductPressure pp = PressureManager.Instance().GetPressureByProductID(pid);
             //第二道泵的压力参数（根据需求，两道泵传感器有差别，参数需要单独配置）
@@ -1154,6 +1159,10 @@ namespace PTool
                 caliParameters[1].Add(p2);
             }
 
+            */
+            List<PressureCalibrationParameter>[] caliParameters = new List<PressureCalibrationParameter>[2];
+            caliParameters[0] = sampleDataList[0];
+            caliParameters[1] = sampleDataList[1];
             if (caliParameters == null || caliParameters.Length == 0)
                 return;
             string title = string.Empty;
@@ -1215,7 +1224,7 @@ namespace PTool
                     ws.Cell(rowIndex, ++columnIndex).Value = tool2No;
                 else
                     ws.Cell(rowIndex, ++columnIndex).Value = m_ToolingNo;
-                ws.Cell(rowIndex, ++columnIndex).Value = sampleDataList[iLoop].Min(x => x.m_PressureValue) * 100;
+                ws.Cell(rowIndex, ++columnIndex).Value = caliParameters[iLoop][0].m_P0 * 100;
                 float mid = PressureManager.Instance().GetMidBySizeLevel(pid, 10, Misc.OcclusionLevel.L);
                 ws.Cell(rowIndex, ++columnIndex).Value = mid == 0 ? "" : (mid).ToString("F2");
                 mid = PressureManager.Instance().GetMidBySizeLevel(pid, 10, Misc.OcclusionLevel.C);
@@ -1285,7 +1294,7 @@ namespace PTool
                     ws.Cell(rowIndex, ++columnIndex).Value = tool2No;
                 else
                     ws.Cell(rowIndex, ++columnIndex).Value = m_ToolingNo;
-                ws.Cell(rowIndex, ++columnIndex).Value = sampleDataList[iLoop].Min(x => x.m_PressureValue) * 100;
+                ws.Cell(rowIndex, ++columnIndex).Value = caliParameters[iLoop][0].m_P0 * 100;
                 float mid = PressureManager.Instance().GetMidBySizeLevel(pid2, 10, Misc.OcclusionLevel.L);
                 ws.Cell(rowIndex, ++columnIndex).Value = mid == 0 ? "" : (mid).ToString("F2");
                 mid = PressureManager.Instance().GetMidBySizeLevel(pid2, 10, Misc.OcclusionLevel.C);
@@ -1426,6 +1435,7 @@ namespace PTool
             foreach (var size in sizes)
             {
                 PressureCalibrationParameter p = new PressureCalibrationParameter();
+                p.m_P0 = pValue;
                 p.m_SyringeSize = size;
                 List<PressureParameter> findobjs = parameters.FindAll((x) => { return x.m_SyringeSize == size; });
                 foreach (var obj in findobjs)
@@ -1901,10 +1911,10 @@ namespace PTool
         /// </summary>
         /// <param name="pid"></param>
         /// <param name="sampleDataList"></param>
-        private void CalcuatePressureBySlope(PumpID pid, List<SampleData> sampleDataList)
+        private List<PressureCalibrationParameter>  CalcuatePressureBySlope(PumpID pid, List<SampleData> sampleDataList)
         {
             if (sampleDataList == null || sampleDataList.Count == 0)
-                return;
+                return null;
             if (m_Channel == 1)
             {
                 switch (pid)
@@ -1922,7 +1932,7 @@ namespace PTool
             List<PressureParameter> parameters = new List<PressureParameter>();
             ProductPressure pp = PressureManager.Instance().GetPressureByProductID(pid);
             if (pp == null)
-                return;
+                return null;
             List<LevelPressure> lps = pp.GetLevelPressureList();
             List<float> midWeights = new List<float>();
             List<int> sizes = new List<int>();
@@ -1956,7 +1966,7 @@ namespace PTool
             {
                 sampleDataList.Clear();
                 MessageBox.Show("测量数据异常，请重试！");
-                return;
+                return null;
             }
 
             float pValue = FindZeroPValue(sampleDataList);
@@ -1966,7 +1976,7 @@ namespace PTool
                 Logger.Instance().ErrorFormat("P值超范围，请重试！P值={0},最小值={1},最大值={2}", pValue, PressureForm.RangeMinP, PressureForm.RangeMaxP);
                 sampleDataList.Clear();
                 MessageBox.Show("P值超范围，请重试！");
-                return;
+                return null;
             }
 
             WritePValue2Pump(pValue);
@@ -1976,6 +1986,7 @@ namespace PTool
             foreach (var size in sizes)
             {
                 PressureCalibrationParameter p = new PressureCalibrationParameter();
+                p.m_P0 = pValue;
                 p.m_SyringeSize = size;
                 List<PressureParameter> findobjs = parameters.FindAll((x) => { return x.m_SyringeSize == size; });
                 foreach (var obj in findobjs)
@@ -2011,7 +2022,7 @@ namespace PTool
             {
                 sampleDataList.Clear();
                 MessageBox.Show("P值变化大，请重试！");
-                return;
+                return null;
             }
 #endif
 
@@ -2044,6 +2055,8 @@ namespace PTool
 
                 GenReport(saveFileName, caliParameters, saveFileName2);
             }
+            //返回计算好的值
+            return caliParameters;
         }
 
         private void CalcuatePValue(ref List<PressureParameter> parameters)
@@ -2056,9 +2069,11 @@ namespace PTool
             }
             Tuple<double, double> slope = CalculateSlope(mSamplingPointList[1].m_Weight, mSamplingPointList[1].m_PressureValue, mSamplingPointList[3].m_Weight, mSamplingPointList[3].m_PressureValue);
 
+            double temp = 0;
             foreach(var item in parameters)
             {
-                item.m_Pressure = (float)slope.Item1 * item.m_MidWeight + (float)slope.Item2;
+                temp = slope.Item1 * item.m_MidWeight + slope.Item2;
+                item.m_Pressure = (float)Math.Round(temp, 2);
             }
         }
         #endregion
