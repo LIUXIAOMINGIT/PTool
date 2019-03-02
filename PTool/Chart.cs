@@ -79,9 +79,9 @@ namespace PTool
         private System.Timers.Timer mSamplingPointTimer = new System.Timers.Timer();
         private bool mSamplingPointStart = false;//是否开始采样了
         private int mSamplingCount = 0;//采样了几次，三次即可
-        private List<SampleData> mSamplingPointList = new List<SampleData>();//6个采样点的数据
+        private List<SampleData> mSamplingPointList = new List<SampleData>();//4个采样点的数据
 
-
+        
 
         /// <summary>
         /// 采样间隔
@@ -2062,7 +2062,7 @@ PumpID pid2 = m_LocalPid;
         private void CalcuatePValue(ref List<PressureParameter> parameters)
         {
             int pointCount = mSamplingPointList.Count;
-            if (pointCount < 6)
+            if (pointCount < 3)
             {
                 MessageBox.Show("采样点太少，无法计算一次方程斜率！");
                 return;

@@ -37,7 +37,7 @@ namespace PTool
         public static int RangeMaxP = 210;
         public static int PressureCalibrationMax = 418;
         public static int SerialNumberCount = 28;               //在指定时间内连续输入字符数量不低于28个时方可认为是由条码枪输入
-        public static List<double> SamplingPoints = new List<double>();//采样点大概7个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
+        public static List<double> SamplingPoints = new List<double>();//采样点大概5个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
 
 
 
