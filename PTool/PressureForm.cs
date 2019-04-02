@@ -37,7 +37,10 @@ namespace PTool
         public static int RangeMaxP = 210;
         public static int PressureCalibrationMax = 418;
         public static int SerialNumberCount = 28;               //在指定时间内连续输入字符数量不低于28个时方可认为是由条码枪输入
-        public static List<double> SamplingPoints = new List<double>();//采样点大概5个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
+        public static List<double> SamplingPoints1 = new List<double>();//采样点大概5个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
+        public static List<double> SamplingPoints2 = new List<double>();//采样点大概5个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
+        public static List<double> SamplingPoints3 = new List<double>();//采样点大概5个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
+        public static List<double> SamplingPoints = new List<double>();//上面三个数组的总和
 
 
 
@@ -94,14 +97,38 @@ namespace PTool
                 RangeMaxP = Int32.Parse(ConfigurationManager.AppSettings.Get("RangeMaxP"));
                 PressureCalibrationMax = Int32.Parse(ConfigurationManager.AppSettings.Get("PressureCalibrationMax"));
                 SerialNumberCount = Int32.Parse(ConfigurationManager.AppSettings.Get("SerialNumberCount"));
-                var samplingPoint = ConfigurationManager.AppSettings.Get("SamplingPoint");
+                var samplingPoint = ConfigurationManager.AppSettings.Get("SamplingPoint1");
 
+                //0~1.5kg区间
                 string[] strSamplingPoints = samplingPoint.Trim().Split(',');
-                SamplingPoints.Clear();
+                SamplingPoints1.Clear();
                 foreach (string s in strSamplingPoints)
                 {
-                    SamplingPoints.Add(double.Parse(s));
+                    SamplingPoints1.Add(double.Parse(s));
                 }
+
+                //1.5~3.0kg区间
+                samplingPoint = ConfigurationManager.AppSettings.Get("SamplingPoint2");
+                strSamplingPoints = samplingPoint.Trim().Split(',');
+                SamplingPoints2.Clear();
+                foreach (string s in strSamplingPoints)
+                {
+                    SamplingPoints2.Add(double.Parse(s));
+                }
+
+                //3.0~6.5kg区间
+                samplingPoint = ConfigurationManager.AppSettings.Get("SamplingPoint3");
+                strSamplingPoints = samplingPoint.Trim().Split(',');
+                SamplingPoints3.Clear();
+                foreach (string s in strSamplingPoints)
+                {
+                    SamplingPoints3.Add(double.Parse(s));
+                }
+
+                SamplingPoints.Clear();
+                SamplingPoints.AddRange(SamplingPoints1);
+                SamplingPoints.AddRange(SamplingPoints2);
+                SamplingPoints.AddRange(SamplingPoints3);
                 #region 不要从config文件读取压力参数
                 /*
                 #region 读GrasebyC6压力范围
