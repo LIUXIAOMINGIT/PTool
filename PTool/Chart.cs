@@ -51,6 +51,7 @@ namespace PTool
         private Graseby9600 m_GrasebyDevice = new Graseby9600();//只用于串口刷新
         private PumpID m_LocalPid = PumpID.GrasebyC6;//默认显示的是C6
         private System.Timers.Timer m_Ch1Timer = new System.Timers.Timer();
+        private bool m_bStopClick = false;//是否人工点击停止
         private int m_SampleInterval = 400;//采样频率：毫秒
 
         private int m_Channel = 1;//1号通道，默认值
@@ -201,7 +202,7 @@ namespace PTool
 
         private void OnChannel1Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if (m_ConnResponse != null && m_ConnResponse.IsOpen())
+            if (m_bStopClick==false && m_ConnResponse != null && m_ConnResponse.IsOpen())
             {
                 m_ConnResponse.GetPressureSensor();
             }
@@ -223,14 +224,14 @@ namespace PTool
         }
         private void OnSamplingPointTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if(mSamplingCount>=3)
+            if(m_bStopClick==false && mSamplingCount >= 3)
             {
                 StopSamplingPointTimer();
                 StartCh1Timer();
                 m_ConnResponse.SetStartControl();
                 return;
             }
-            if(mSamplingPointStart)
+            if(m_bStopClick==false && mSamplingPointStart)
             {
                 m_ConnResponse.GetPressureSensor();
                 mSamplingCount++;
@@ -354,7 +355,7 @@ namespace PTool
             float max = PressureManager.Instance().GetMaxBySizeLevel(pid, 50, Misc.OcclusionLevel.H);
             if (max < args.Weight)
             {
-                Complete(1);
+                Complete();
                 AlertMessageWhenComplete(string.Format("压力值已超出最大范围{0},调试结束!", max));
             }
         }
@@ -394,8 +395,9 @@ namespace PTool
         /// <summary>
         /// 调试结束，保存相关数据，停止泵，停止时钟
         /// </summary>
-        private void Complete(int channel = 1)
+        private void Complete()
         {
+            StopSamplingPointTimer();
             StopCh1Timer();
             if (m_ConnResponse != null)
             {
@@ -1658,29 +1660,30 @@ PumpID pid2 = m_LocalPid;
                 return bRet;
             }
             //当采集到的重量大于配置参数时，可以停止采集，并计算相关数据写入到泵中
-            PumpID pid = PumpID.None;
-            switch (m_LocalPid)
-            {
-                case PumpID.GrasebyF6_2:
-                    pid = PumpID.GrasebyF6;
-                    break;
-                case PumpID.WZS50F6_2:
-                    pid = PumpID.WZS50F6;
-                    break;
-                default:
-                    pid = m_LocalPid;
-                    break;
-            }
-            float max = PressureManager.Instance().GetMaxBySizeLevel(pid, 50, Misc.OcclusionLevel.H);
-            if (iLength > 0 && sampleDataList[iLength - 1].m_Weight < max)
-            {
-                bRet = false;
-            }
+            //PumpID pid = PumpID.None;
+            //switch (m_LocalPid)
+            //{
+            //    case PumpID.GrasebyF6_2:
+            //        pid = PumpID.GrasebyF6;
+            //        break;
+            //    case PumpID.WZS50F6_2:
+            //        pid = PumpID.WZS50F6;
+            //        break;
+            //    default:
+            //        pid = m_LocalPid;
+            //        break;
+            //}
+            //float max = PressureManager.Instance().GetMaxBySizeLevel(pid, 50, Misc.OcclusionLevel.H);
+            //if (iLength > 0 && sampleDataList[iLength - 1].m_Weight < max)
+            //{
+            //    bRet = false;
+            //}
             return bRet;
         }
 
         private void picStart_Click(object sender, EventArgs e)
         {
+            m_bStopClick = false;
             mCurrentSamplingIndex = 0;
             detail.P0 = 0f;
             detail.CaliParameters.Clear();
@@ -1841,6 +1844,7 @@ PumpID pid2 = m_LocalPid;
 
         private void picStop_Click(object sender, EventArgs e)
         {
+            m_bStopClick = true;//人工停止了
             mCurrentSamplingIndex = 0;
             Complete();
             EnableContols(true);
@@ -2073,19 +2077,29 @@ PumpID pid2 = m_LocalPid;
         private void CalcuatePValue(ref List<PressureParameter> parameters)
         {
             int pointCount = mSamplingPointList.Count;
-            if (pointCount < 3)
+            if (pointCount < 11)
             {
                 MessageBox.Show("采样点太少，无法计算曲线！");
                 return;
             }
 
             double[]a = CalculateSection1Poly();
-            double[]b = CalculateSection2Poly();
-            double[]c = CalculateSection3Poly();
+            //double[]b = CalculateSection2Poly();//第二段直接用直线，不要拟合了
 
-            //Tuple<double, double> slope = CalculateSlope(mSamplingPointList[1].m_Weight, mSamplingPointList[1].m_PressureValue, mSamplingPointList[3].m_Weight, mSamplingPointList[3].m_PressureValue);
+            Tuple<double, double> slope = CalculateSlope(mSamplingPointList[pointCount -3].m_Weight, mSamplingPointList[pointCount - 3].m_PressureValue, mSamplingPointList[pointCount - 1].m_Weight, mSamplingPointList[pointCount - 1].m_PressureValue);
+            double[] b = new double[2];
+            b[0] = slope.Item2;
+            b[1] = slope.Item1;
 
             double temp = 0;
+            temp = b[0] + b[1] * mSamplingPointList[pointCount - 2].m_Weight;
+            if(Math.Abs(temp- mSamplingPointList[pointCount - 2].m_PressureValue) >= PressureForm.m_StandardError)
+            {
+                Logger.Instance().InfoFormat("直线方程计算结果与实际采样有较大误差,采样值={0}，计算值={1}", mSamplingPointList[pointCount - 2].m_PressureValue, temp);
+                MessageBox.Show("采样误差大，请重试！");
+                return;
+            }
+         
             int position = -1;
             foreach(var item in parameters)
             {
@@ -2096,11 +2110,11 @@ PumpID pid2 = m_LocalPid;
                         temp = a[0] + a[1] * item.m_MidWeight + a[2] * Math.Pow(item.m_MidWeight, 2);
                         break;
                     case 1:
-                        temp = b[0] + b[1] * item.m_MidWeight + b[2] * Math.Pow(item.m_MidWeight, 2);
+                        temp = b[0] + b[1] * item.m_MidWeight;
                         break;
-                    case 2:
-                        temp = c[0] + c[1] * item.m_MidWeight;
-                        break;
+                    //case 2:
+                    //    temp = c[0] + c[1] * item.m_MidWeight;
+                    //    break;
                     default:
                         break;
                 }
@@ -2109,46 +2123,37 @@ PumpID pid2 = m_LocalPid;
         }
         #endregion
 
-        #region 三次方程计算压力P值,18采样点分三段进行
+        #region 2次方程计算压力P值,11采样点分2段进行
 
         private  int GetPositionOfWeight(double weight)
         {
             int count1 = PressureForm.SamplingPoints1.Count;
-            if (count1 <= 0)
+            if (count1 < 3)
             {
                 MessageBox.Show("采样点太少，无法计算拟合曲线！");
                 return -1;
             }
 
             int count2 = PressureForm.SamplingPoints2.Count;
-            if (count2 <= 0)
+            if (count2 < 2)
             {
                 MessageBox.Show("采样点太少，无法计算拟合曲线！");
                 return -1;
             }
 
-            int count3 = PressureForm.SamplingPoints3.Count;
-            if (count3 <= 0)
-            {
-                MessageBox.Show("采样点太少，无法计算拟合曲线！");
-                return -1;
-            }
+            //int count3 = PressureForm.SamplingPoints3.Count;
+            //if (count3 <= 0)
+            //{
+            //    MessageBox.Show("采样点太少，无法计算拟合曲线！");
+            //    return -1;
+            //}
 
-
-            if (weight < PressureForm.SamplingPoints1[count1 - 1])
+            if (weight <= PressureForm.SamplingPoints1[count1 - 1])
             {
                 return 0;
             }
-            else if (weight < PressureForm.SamplingPoints2[count2 - 1])
-            {
-                return 1;
-            }
-            else if (weight > PressureForm.SamplingPoints2[count2 - 1])
-            {
-                return 2;
-            }
             else
-                return -2;
+                return 1;
 
         }
 
@@ -2184,17 +2189,21 @@ PumpID pid2 = m_LocalPid;
 
         private double[] CalculateSection2Poly()
         {
-            if (mSamplingPointList.Count < PressureForm.SamplingPoints1.Count + PressureForm.SamplingPoints2.Count)
+            if (mSamplingPointList.Count < PressureForm.SamplingPoints1.Count  + 2  || PressureForm.SamplingPoints2.Count<2)
             {
                 MessageBox.Show("第二段曲线采样点太少，无法计算拟合曲线！");
                 return null;
             }
             int index = PressureForm.SamplingPoints1.Count;
+             
+            int count = mSamplingPointList.Count - index;
 
-            double[] arrX = new double[PressureForm.SamplingPoints2.Count];
-            double[] arrY = new double[PressureForm.SamplingPoints2.Count];
+            count = Math.Min(count, PressureForm.SamplingPoints2.Count);
+             
+            double[] arrX = new double[count];
+            double[] arrY = new double[count];
 
-            for (int i = index; i < index + PressureForm.SamplingPoints2.Count; i++)
+            for (int i = index; i < index + count; i++)
             {
                 arrX[i- index] = mSamplingPointList[i].m_Weight;
                 arrY[i- index] = mSamplingPointList[i].m_PressureValue;
@@ -2202,31 +2211,31 @@ PumpID pid2 = m_LocalPid;
             return CalculatePoly(arrX, arrY);
         }
 
-        private double[] CalculateSection3Poly()
-        {
-            if (mSamplingPointList.Count <= PressureForm.SamplingPoints1.Count + PressureForm.SamplingPoints2.Count)
-            {
-                MessageBox.Show("第三段曲线采样点太少，无法计算拟合曲线！");
-                return null;
-            }
-            int index = PressureForm.SamplingPoints1.Count + PressureForm.SamplingPoints2.Count;
+        //private double[] CalculateSection3Poly()
+        //{
+        //    if (mSamplingPointList.Count <= PressureForm.SamplingPoints1.Count + PressureForm.SamplingPoints2.Count)
+        //    {
+        //        MessageBox.Show("第三段曲线采样点太少，无法计算拟合曲线！");
+        //        return null;
+        //    }
+        //    int index = PressureForm.SamplingPoints1.Count + PressureForm.SamplingPoints2.Count;
 
-            if(mSamplingPointList.Count - index<3)
-            {
-                MessageBox.Show("第三段曲线采样点太少，无法计算拟合曲线！");
-                return null;
-            }
+        //    if(mSamplingPointList.Count - index<3)
+        //    {
+        //        MessageBox.Show("第三段曲线采样点太少，无法计算拟合曲线！");
+        //        return null;
+        //    }
 
-            double[] arrX = new double[mSamplingPointList.Count - index];
-            double[] arrY = new double[mSamplingPointList.Count - index];
+        //    double[] arrX = new double[mSamplingPointList.Count - index];
+        //    double[] arrY = new double[mSamplingPointList.Count - index];
 
-            for (int i = index; i < mSamplingPointList.Count; i++)
-            {
-                arrX[i - index] = mSamplingPointList[i].m_Weight;
-                arrY[i - index] = mSamplingPointList[i].m_PressureValue;
-            }
-            return CalculatePoly(arrX, arrY, 1);
-        }
+        //    for (int i = index; i < mSamplingPointList.Count; i++)
+        //    {
+        //        arrX[i - index] = mSamplingPointList[i].m_Weight;
+        //        arrY[i - index] = mSamplingPointList[i].m_PressureValue;
+        //    }
+        //    return CalculatePoly(arrX, arrY, 1);
+        //}
 
         /// <summary>
         /// 多项式拟合
@@ -2285,12 +2294,12 @@ PumpID pid2 = m_LocalPid;
             //计算相关的值，一次方程
             CalcuatePValue(ref parameters);
 
-            //if (!IsValidEx(sampleDataList))
-            //{
-            //    sampleDataList.Clear();
-            //    MessageBox.Show("测量数据异常，请重试！");
-            //    return null;
-            //}
+            if (!IsValidEx(sampleDataList))
+            {
+                sampleDataList.Clear();
+                MessageBox.Show("测量数据异常，请重试！");
+                return null;
+            }
 
             float pValue = FindZeroPValue(sampleDataList);
 
