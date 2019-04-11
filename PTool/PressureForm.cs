@@ -39,7 +39,10 @@ namespace PTool
         public static int SerialNumberCount = 28;               //在指定时间内连续输入字符数量不低于28个时方可认为是由条码枪输入
         public static List<double> SamplingPoints1 = new List<double>();//采样点大概5个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
         public static List<double> SamplingPoints2 = new List<double>();//采样点大概5个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
-        //public static List<double> SamplingPoints3 = new List<double>();//采样点大概5个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
+
+        public static List<double> SingleSamplingPoints1 = new List<double>();//采样点大概5个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
+        public static List<double> SingleSamplingPoints2 = new List<double>();//采样点大概5个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
+
         public static List<double> SamplingPoints = new List<double>();//上面三个数组的总和
         public static double m_StandardError = 0.05;
 
@@ -114,6 +117,25 @@ namespace PTool
                 foreach (string s in strSamplingPoints)
                 {
                     SamplingPoints2.Add(double.Parse(s));
+                }
+
+                //单道泵
+                samplingPoint = ConfigurationManager.AppSettings.Get("SingleSamplingPoint1");
+                //0~3.5kg区间
+                strSamplingPoints = samplingPoint.Trim().Split(',');
+                SingleSamplingPoints1.Clear();
+                foreach (string s in strSamplingPoints)
+                {
+                    SingleSamplingPoints1.Add(double.Parse(s));
+                }
+
+                //4~7kg区间
+                samplingPoint = ConfigurationManager.AppSettings.Get("SingleSamplingPoint2");
+                strSamplingPoints = samplingPoint.Trim().Split(',');
+                SingleSamplingPoints2.Clear();
+                foreach (string s in strSamplingPoints)
+                {
+                    SingleSamplingPoints2.Add(double.Parse(s));
                 }
 
 

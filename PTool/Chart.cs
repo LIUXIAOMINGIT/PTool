@@ -80,7 +80,7 @@ namespace PTool
         private System.Timers.Timer mSamplingPointTimer = new System.Timers.Timer();
         private bool mSamplingPointStart = false;//是否开始采样了
         private int mSamplingCount = 0;//采样了几次，三次即可
-        private List<SampleData> mSamplingPointList = new List<SampleData>();//18个采样点的数据
+        private List<SampleData> mSamplingPointList = new List<SampleData>();//9个采样点的数据
 
         
 
@@ -244,6 +244,27 @@ namespace PTool
         {
             detail.Pid = pid;
             m_LocalPid = pid;
+            switch(pid)
+            {
+                case PumpID.Graseby2000:
+                case PumpID.Graseby2100:
+                case PumpID.GrasebyC6:
+                case PumpID.GrasebyC6T:
+                case PumpID.WZ50C6:
+                case PumpID.WZ50C6T:
+                    PressureForm.SamplingPoints.Clear();
+                    PressureForm.SamplingPoints.AddRange(PressureForm.SingleSamplingPoints1);
+                    PressureForm.SamplingPoints.AddRange(PressureForm.SingleSamplingPoints2);
+                    break;
+                case PumpID.GrasebyF6:
+                case PumpID.GrasebyF6_2:
+                case PumpID.WZS50F6:
+                case PumpID.WZS50F6_2:
+                    PressureForm.SamplingPoints.Clear();
+                    PressureForm.SamplingPoints.AddRange(PressureForm.SamplingPoints1);
+                    PressureForm.SamplingPoints.AddRange(PressureForm.SamplingPoints2);
+                    break;
+            }
         }
 
         /// <summary>
@@ -351,8 +372,13 @@ namespace PTool
             //    AlertMessageWhenComplete(string.Format("采样结束，共{0}个采样点！", mCurrentSamplingIndex));
             //    return;
             //}
+         
 
             float max = PressureManager.Instance().GetMaxBySizeLevel(pid, 50, Misc.OcclusionLevel.H);
+
+            int pointsCount = PressureForm.SamplingPoints.Count;
+            if (pointsCount > 0)
+                max = (float)Math.Max(PressureForm.SamplingPoints[pointsCount - 1], max);
             if (max < args.Weight)
             {
                 Complete();
@@ -1692,6 +1718,28 @@ PumpID pid2 = m_LocalPid;
             mSamplingPointList.Clear();
             WavelinePanel.Invalidate();
 
+            switch (m_LocalPid)
+            {
+                case PumpID.Graseby2000:
+                case PumpID.Graseby2100:
+                case PumpID.GrasebyC6:
+                case PumpID.GrasebyC6T:
+                case PumpID.WZ50C6:
+                case PumpID.WZ50C6T:
+                    PressureForm.SamplingPoints.Clear();
+                    PressureForm.SamplingPoints.AddRange(PressureForm.SingleSamplingPoints1);
+                    PressureForm.SamplingPoints.AddRange(PressureForm.SingleSamplingPoints2);
+                    break;
+                case PumpID.GrasebyF6:
+                case PumpID.GrasebyF6_2:
+                case PumpID.WZS50F6:
+                case PumpID.WZS50F6_2:
+                    PressureForm.SamplingPoints.Clear();
+                    PressureForm.SamplingPoints.AddRange(PressureForm.SamplingPoints1);
+                    PressureForm.SamplingPoints.AddRange(PressureForm.SamplingPoints2);
+                    break;
+            }
+
             #region 参数输入检查
 
             if (SamplingStartOrStop != null)
@@ -2077,7 +2125,7 @@ PumpID pid2 = m_LocalPid;
         private void CalcuatePValue(ref List<PressureParameter> parameters)
         {
             int pointCount = mSamplingPointList.Count;
-            if (pointCount < 11)
+            if (pointCount < 8)
             {
                 MessageBox.Show("采样点太少，无法计算曲线！");
                 return;
