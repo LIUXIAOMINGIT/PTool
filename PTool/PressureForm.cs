@@ -44,7 +44,8 @@ namespace PTool
         public static List<double> SingleSamplingPoints2 = new List<double>();//采样点大概5个，当工装读数在某个值时，自动停止，等待5秒，再读三次工装和P值，比较是否稳定。不稳定，再读
 
         public static List<double> SamplingPoints = new List<double>();//上面三个数组的总和
-        public static double m_StandardError = 0.05;
+        public static double m_StandardError = 0.05; 
+        public static double m_SamplingError = 0.1; //采样误差范围
 
 
         private const int INPUTSPEED = 50;//条码枪输入字符速率小于50毫秒
@@ -144,6 +145,10 @@ namespace PTool
                 SamplingPoints.AddRange(SamplingPoints2);
                 var standardError = ConfigurationManager.AppSettings.Get("StandardError");
                 m_StandardError = double.Parse(standardError);
+
+                var samplingError = ConfigurationManager.AppSettings.Get("SamplingError");
+                m_SamplingError = double.Parse(samplingError);
+                
                 #region 不要从config文件读取压力参数
                 /*
                 #region 读GrasebyC6压力范围

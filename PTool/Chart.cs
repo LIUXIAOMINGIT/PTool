@@ -332,7 +332,9 @@ namespace PTool
 
             if (mCurrentSamplingIndex < PressureForm.SamplingPoints.Count && mCurrentSamplingIndex >= 0)
             {
-                if (args.Weight >= PressureForm.SamplingPoints[mCurrentSamplingIndex])
+                if (args.Weight >= PressureForm.SamplingPoints[mCurrentSamplingIndex]
+                    || Math.Abs(args.Weight - PressureForm.SamplingPoints[mCurrentSamplingIndex])<= PressureForm.m_SamplingError
+                    )
                 {
                     StopCh1Timer();
                     m_ConnResponse.SetStopControl(GlobalResponse.CommandPriority.High);
@@ -2127,9 +2129,20 @@ PumpID pid2 = m_LocalPid;
             int pointCount = mSamplingPointList.Count;
             if (pointCount < 8)
             {
-                MessageBox.Show("采样点太少，无法计算曲线！");
-                return;
+                Logger.Instance().WarnFormat("采样点{0}个点，曲线精度可能受影响！",pointCount );
             }
+
+            StringBuilder sb = new StringBuilder("采样的点[重量：压力]：");
+            for (int i = 0; i < pointCount; i++)
+            {
+                sb.Append(mSamplingPointList[i].m_Weight.ToString());
+                sb.Append(" : ");
+                sb.Append(mSamplingPointList[i].m_PressureValue.ToString());
+                if (i != pointCount - 1)
+                    sb.Append(",  ");
+            }
+            Logger.Instance().Info(sb.ToString());
+
 
             double[]a = CalculateSection1Poly();
             //double[]b = CalculateSection2Poly();//第二段直接用直线，不要拟合了
